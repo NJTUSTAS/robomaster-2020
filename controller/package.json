@@ -3,6 +3,8 @@
   "name": "stas-robomaster",
   "main": "index.js",
   "dependencies": {
+    "await-sleep": "0.0.1",
+    "byline": "^5.0.0",
     "rpio": "^2.2.0"
   }
 }
