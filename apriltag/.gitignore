@@ -6,3 +6,9 @@ example/opencv_demo
 example/apriltag_demo
 build/
 
+Makefile
+CMakeCache.txt
+CMakeFiles/
+apriltag.pc
+apriltagTargets.cmake
+cmake_install.cmake
