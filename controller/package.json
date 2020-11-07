@@ -1,5 +1,8 @@
 {
   "private": true,
   "name": "stas-robomaster",
-  "main": "index.js"
+  "main": "index.js",
+  "dependencies": {
+    "rpio": "^2.2.0"
+  }
 }
