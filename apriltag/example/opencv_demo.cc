@@ -139,15 +139,15 @@ int main(int argc, char *argv[])
         for (int i = 0; i < zarray_size(detections); i++) {
             apriltag_detection_t *det;
             zarray_get(detections, i, &det);
-            cout << "id=" << det->id << ",corners=[("
+            cout << "id=" << det->id << ";corners=[("
                  << det->p[0][0] << "," << det->p[0][1] << "),("
                  << det->p[1][0] << "," << det->p[1][1] << "),("
                  << det->p[2][0] << "," << det->p[2][1] << "),("
-                 << det->p[3][0] << "," << det->p[3][1] << ")],center=("
+                 << det->p[3][0] << "," << det->p[3][1] << ")];center=("
                  << det->c[0] << ","
-                 << det->c[1] << "),hamming="
-                 << det->hamming << ",margin="
-                 << det->decision_margin << ";";
+                 << det->c[1] << ");hamming="
+                 << det->hamming << ";margin="
+                 << det->decision_margin << ";;";
         }
         cout << endl;
         apriltag_detections_destroy(detections);
