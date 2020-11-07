@@ -16,3 +16,5 @@ apriltag_demo
 libapriltag.so.3
 libapriltag.so.3.1.0
 opencv_demo
+apriltag_detect.docstring.h
+apriltag_py_type.docstring.h
