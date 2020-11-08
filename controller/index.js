@@ -11,5 +11,6 @@ detector.on("detect", result => {
 const app = express();
 app.post("/detector/close", (req, res) => {
     detector.close();
+    res.sendStatus(204);
 });
 app.listen(8000);
