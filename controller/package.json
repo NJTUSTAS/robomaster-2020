@@ -5,6 +5,7 @@
   "dependencies": {
     "await-sleep": "0.0.1",
     "byline": "^5.0.0",
+    "express": "^4.17.1",
     "rpio": "^2.2.0"
   }
 }

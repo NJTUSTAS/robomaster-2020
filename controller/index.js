@@ -1,13 +1,15 @@
 #!/usr/bin/node
 
 const { TagDetector } = require("./tag_detector");
-const sleep = require("await-sleep");
+const express = require("express");
 
-(async () => {
-    const detector = new TagDetector();
-    detector.on("detect", result => {
-        console.log(JSON.stringify(result));
-    });
-    await sleep(10000);
+const detector = new TagDetector();
+detector.on("detect", result => {
+    console.log(JSON.stringify(result));
+});
+
+const app = express();
+app.post("/detector/close", (req, res) => {
     detector.close();
-})();
+});
+app.listen(8000);
