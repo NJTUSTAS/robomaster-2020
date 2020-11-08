@@ -56,7 +56,12 @@ class TagDetector extends EventEmitter {
     constructor() {
         super();
 
-        this.process = spawn("./tag_detector");
+        this.process = spawn("./tag_detector", [
+		"--camera-width", "960",
+		"--camera-height", "720",
+		"--threads", "4",
+		"--decimate", "2.0"
+	]);
 
         byline(this.process.stdout).on("data", line => {
             this.emit("detect", parseOutputLine(line.toString()));
