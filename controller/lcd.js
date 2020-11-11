@@ -32,7 +32,7 @@ function writeLine(str, addr, format = false) {
         str = formatText(str);
     }
     for (let i = 0; i < str.length; i++) {
-        write(str[i], 1);
+        write(str.charCodeAt(i), 1);
     }
 }
 
