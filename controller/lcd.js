@@ -4,7 +4,7 @@ const rpio = require("rpio");
  * Magic numbers to initialize the i2c display device and write output,
  * cribbed from various python drivers.
  */
-const init = Buffer.from([0x03, 0x03, 0x03, 0x02, 0x28, 0x0c, 0x01, 0x06]);
+const INIT_SEQ = Buffer.from([0x03, 0x03, 0x03, 0x02, 0x28, 0x0c, 0x01, 0x06]);
 const LINE1 = 0x80;
 const LINE2 = 0xc0;
 const ENABLE = 0x04;
@@ -39,8 +39,8 @@ function writeLine(str, addr, format = false) {
 function init(address = 0x27) {
     rpio.i2cSetSlaveAddress(address);
     rpio.i2cSetBaudRate(10000);
-    for (var i = 0; i < init.length; i++) {
-        write(init[i], 0);
+    for (var i = 0; i < INIT_SEQ.length; i++) {
+        write(INIT_SEQ[i], 0);
     }
 }
 
