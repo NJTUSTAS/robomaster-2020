@@ -1,5 +1,6 @@
 #!/usr/bin/node
 
+const rpio = require("rpio");
 const { lcdInit, lcdWriteLine, LCD_LINE1, LCD_LINE2 } = require("./lcd");
 rpio.i2cBegin();
 lcdInit();
