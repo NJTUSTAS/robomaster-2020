@@ -5,8 +5,8 @@ const rpio = require("rpio");
  * cribbed from various python drivers.
  */
 const init = Buffer.from([0x03, 0x03, 0x03, 0x02, 0x28, 0x0c, 0x01, 0x06]);
-export const LCD_LINE1 = 0x80;
-export const LCD_LINE2 = 0xc0;
+const LCD_LINE1 = 0x80;
+const LCD_LINE2 = 0xc0;
 const LCD_ENABLE = 0x04;
 const LCD_BACKLIGHT = 0x08;
 
@@ -26,7 +26,7 @@ function lcdWrite(data, mode) {
 /*
  * Write a string to the specified LCD line.
  */
-export function lcdWriteLine(str, addr) {
+function lcdWriteLine(str, addr) {
     lcdWrite(addr, 0);
 
     str.split('').forEach(function (c) {
@@ -34,10 +34,12 @@ export function lcdWriteLine(str, addr) {
     });
 }
 
-export function lcdInit(address = 0x27) {
+function lcdInit(address = 0x27) {
     rpio.i2cSetSlaveAddress(address);
     rpio.i2cSetBaudRate(10000);
     for (var i = 0; i < init.length; i++) {
         lcdWrite(init[i], 0);
     }
 }
+
+module.exports = { LCD_LINE1, LCD_LINE2, lcdInit, lcdWriteLine };
