@@ -15,12 +15,10 @@ detector.on("detect", result => {
 
     let text = "";
     for (const det of result.detections) {
-        if (text !== "") {
-            text += " ";
-        }
         text += det.id;
+        text += " ";
     }
-    lcd.writeLine(text, lcd.LINE1);
+    lcd.writeLine(text, lcd.LINE1, true);
 });
 
 const app = express();
