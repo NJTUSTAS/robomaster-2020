@@ -14,9 +14,9 @@ const LCD_BACKLIGHT = 0x08;
  * Data is written 4 bits at a time with the lower 4 bits containing the mode.
  */
 function lcdWrite4(data) {
-    rpio.i2cWrite(Buffer([(data | LCD_BACKLIGHT)]));
-    rpio.i2cWrite(Buffer([(data | LCD_ENABLE | LCD_BACKLIGHT)]));
-    rpio.i2cWrite(Buffer([((data & ~LCD_ENABLE) | LCD_BACKLIGHT)]));
+    rpio.i2cWrite(Buffer.from([(data | LCD_BACKLIGHT)]));
+    rpio.i2cWrite(Buffer.from([(data | LCD_ENABLE | LCD_BACKLIGHT)]));
+    rpio.i2cWrite(Buffer.from([((data & ~LCD_ENABLE) | LCD_BACKLIGHT)]));
 }
 function lcdWrite(data, mode) {
     lcdWrite4(mode | (data & 0xF0));
