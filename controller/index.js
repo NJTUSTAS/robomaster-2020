@@ -6,7 +6,7 @@ const bodyParser = require("body-parser");
 const rpio = require("rpio");
 
 const detector = new TagDetector();
-detector.on("detect", result => {
+detector.on("frame", result => {
     console.log(JSON.stringify(result));
 });
 

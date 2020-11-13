@@ -47,7 +47,7 @@ function parseOutputLine(line) {
     }
     return {
         detections: detections,
-        epoch: epoch,
+        captureTime: epoch,
         timeElapsed: timeElapsed
     };
 }
@@ -64,7 +64,7 @@ class TagDetector extends EventEmitter {
         ]);
 
         byline(this.process.stdout).on("data", line => {
-            this.emit("detect", parseOutputLine(line.toString()));
+            this.emit("frame", parseOutputLine(line.toString()));
         });
 
         byline(this.process.stderr).on("data", line => {
