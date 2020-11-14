@@ -1,10 +1,13 @@
 const rpio = require("rpio");
 
 function sendCommand(command, data) {
-    rpio.i2cSetSlaveAddress(0x55);
+    rpio.i2cSetSlaveAddress(0x4);
     rpio.i2cSetBaudRate(10000);
-    rpio.i2cWrite(Buffer.from([command.charCodeAt(0), data, 79]));
+    const err = rpio.i2cWrite(Buffer.from([command.charCodeAt(0), data, 79]));
     console.info(`command: ${command.charAt(0)} ${data}`);
+    if (err !== 0) {
+        console.warn(`errno ${err} while sending`);
+    }
 }
 
 function setSpeed(wheel, speed) {
