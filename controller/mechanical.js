@@ -26,7 +26,7 @@ function setSpeed(wheel, speed) {
         speed = -1.0;
         console.warn(`setting ${wheel} wheel speed to ${speed}`);
     }
-    const speed_raw = Math.round(speed * 255.0);
+    const speed_raw = Math.round(Math.abs(speed) * 255.0);
     sendCommand(command, speed_raw);
 }
 
