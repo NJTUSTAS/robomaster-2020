@@ -14,10 +14,10 @@ function setSpeed(wheel, speed) {
     let command;
     switch (wheel) {
         case "left":
-            command = speed < 0.0 ? "L" : "l";
+            command = speed < 0.0 ? "l" : "L";
             break;
         case "right":
-            command = speed < 0.0 ? "R" : "r";
+            command = speed < 0.0 ? "r" : "R";
             break;
         default:
             throw `illegal wheel ${wheel}`;
