@@ -1,5 +1,7 @@
 const rpio = require("rpio");
 
+const SPEED_LIMIT=0.15;
+
 function sendCommand(command, data) {
     rpio.i2cSetSlaveAddress(0x4);
     rpio.i2cSetBaudRate(10000);
@@ -22,11 +24,11 @@ function setSpeed(wheel, speed) {
         default:
             throw `illegal wheel ${wheel}`;
     }
-    if (speed > 1.0) {
-        speed = 1.0;
+    if (speed > SPEED_LIMIT) {
+        speed = SPEED_LIMIT;
         console.warn(`setting ${wheel} wheel speed to ${speed}`);
-    } else if (speed < -1.0) {
-        speed = -1.0;
+    } else if (speed < -SPEED_LIMIT) {
+        speed = -SPEED_LIMIT;
         console.warn(`setting ${wheel} wheel speed to ${speed}`);
     }
     const speed_raw = Math.round(Math.abs(speed) * 255.0);
