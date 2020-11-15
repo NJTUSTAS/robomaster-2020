@@ -5,8 +5,7 @@ const rpio = require("rpio");
  * cribbed from various python drivers.
  */
 const INIT_SEQ = Buffer.from([0x03, 0x03, 0x03, 0x02, 0x28, 0x0c, 0x01, 0x06]);
-const LINE1 = 0x80;
-const LINE2 = 0xc0;
+const LINE_IDS = [0x80, 0xc0];
 const ENABLE = 0x04;
 const BACKLIGHT = 0x08;
 
@@ -23,27 +22,6 @@ function write(data, mode) {
     write4(mode | ((data << 4) & 0xF0));
 }
 
-/*
- * Write a string to the specified LCD line.
- */
-function writeLine(str, addr, format = false) {
-    write(addr, 0);
-    if (format) {
-        str = formatText(str);
-    }
-    for (let i = 0; i < str.length; i++) {
-        write(str.charCodeAt(i), 1);
-    }
-}
-
-function init(address = 0x27) {
-    rpio.i2cSetSlaveAddress(address);
-    rpio.i2cSetBaudRate(10000);
-    for (var i = 0; i < INIT_SEQ.length; i++) {
-        write(INIT_SEQ[i], 0);
-    }
-}
-
 function formatText(text) {
     if (text.length >= 16) {
         return text.substring(0, 16);
@@ -52,4 +30,40 @@ function formatText(text) {
     }
 }
 
-module.exports = { LINE1, LINE2, init, writeLine };
+class LCD {
+    constructor(address = 0x27) {
+        this.address = address;
+    }
+
+    /**
+     * @param {number} line Line number, possible values: 0 and 1
+     * @param {string} text Text to print
+     * @param {boolean} format When formatting is enabled,
+     *  text will be cut or appended with spaces to ensure it has
+     *  a length of 16.
+     */
+    writeLine(line, text, format = false) {
+        if (!(line >= 0 && line < LINE_IDS.length)) {
+            throw `illegal line number ${line}`;
+        }
+        if (format === true) {
+            text = formatText(text);
+        }
+        rpio.i2cSetSlaveAddress(this.address);
+        write(LINE_IDS[line], 0);
+        for (let i = 0; i < text.length; i++) {
+            write(text.charCodeAt(i), 1);
+        }
+        console.debug(`lcd@${this.address}: write line ${line} '${text}'`);
+    }
+
+    init() {
+        rpio.i2cSetSlaveAddress(address);
+        for (var i = 0; i < INIT_SEQ.length; i++) {
+            write(INIT_SEQ[i], 0);
+        }
+        console.debug(`lcd@${this.address}: init`);
+    }
+}
+
+module.exports = LCD;

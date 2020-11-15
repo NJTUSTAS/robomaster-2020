@@ -3,7 +3,7 @@
 const { spawn } = require("child_process");
 const byline = require("byline");
 const rpio = require("rpio");
-const lcd = require("./lcd");
+const LCD = require("./lcd");
 
 byline(
     spawn("hostname", ["-I"]).stdout
@@ -15,14 +15,15 @@ byline(
         }
     }
     rpio.i2cBegin();
+
+    const lcd = new LCD();
     lcd.init();
     if (filteredIps.length >= 1) {
-        console.log(`ip.1=${filteredIps[0]}`);
-        lcd.writeLine(filteredIps[0], lcd.LINE1);
+        lcd.writeLine(0, filteredIps[0]);
     }
     if (filteredIps.length >= 2) {
-        console.log(`ip.2=${filteredIps[1]}`);
-        lcd.writeLine(filteredIps[1], lcd.LINE2);
+        lcd.writeLine(1, filteredIps[1]);
     }
+
     rpio.i2cEnd();
 });
