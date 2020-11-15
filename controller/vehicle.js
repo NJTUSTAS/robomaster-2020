@@ -1,4 +1,5 @@
 const rpio = require("rpio");
+const I2CDevice = require("./i2c");
 
 function sendCommand(address, command, data) {
     rpio.i2cSetSlaveAddress(address);
@@ -9,9 +10,9 @@ function sendCommand(address, command, data) {
     }
 }
 
-class Vehicle {
+class Vehicle extends I2CDevice {
     constructor(address = 0x04) {
-        this.address = address;
+        super(address);
         this.speedLimit = 1.0;
     }
 

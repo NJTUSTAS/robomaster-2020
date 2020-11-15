@@ -1,4 +1,5 @@
 const rpio = require("rpio");
+const I2CDevice = require("./i2c");
 
 /*
  * Magic numbers to initialize the i2c display device and write output,
@@ -30,9 +31,9 @@ function formatText(text) {
     }
 }
 
-class LCD {
+class LCD extends I2CDevice {
     constructor(address = 0x27) {
-        this.address = address;
+        super(address);
     }
 
     /**
