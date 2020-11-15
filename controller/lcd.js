@@ -58,7 +58,7 @@ class LCD {
     }
 
     init() {
-        rpio.i2cSetSlaveAddress(address);
+        rpio.i2cSetSlaveAddress(this.address);
         for (var i = 0; i < INIT_SEQ.length; i++) {
             write(INIT_SEQ[i], 0);
         }
