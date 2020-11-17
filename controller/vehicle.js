@@ -1,14 +1,4 @@
-const rpio = require("rpio");
 const I2CDevice = require("./i2c");
-
-function sendCommand(address, command, data) {
-    rpio.i2cSetSlaveAddress(address);
-    const err = rpio.i2cWrite(Buffer.from([command.charCodeAt(0), data, 79]));
-    console.debug(`vehicle@${address}: ${command.charAt(0)} ${data}`);
-    if (err !== 0) {
-        console.warn(`vehicle@${address}: ${err} while sending`);
-    }
-}
 
 class Vehicle extends I2CDevice {
     constructor(address = 0x04) {
@@ -16,11 +6,16 @@ class Vehicle extends I2CDevice {
         this.speedLimit = 1.0;
     }
 
+    async _sendCommand(address, command, data) {
+        await this._i2cWrite(Buffer.from([command.charCodeAt(0), data, 79]));
+        console.debug(`vehicle@${address}: ${command.charAt(0)} ${data}`);
+    }
+
     /**
      * @param {"left"|"right"} wheel The wheel to control
      * @param {number} speed Speed of the wheel, ranging from -1.0 to 1.0
      */
-    setSpeed(wheel, speed) {
+    async setSpeed(wheel, speed) {
         let command;
         switch (wheel) {
             case "left":
@@ -38,24 +33,28 @@ class Vehicle extends I2CDevice {
             speed = this.speedLimit;
         }
         const rawSpeed = Math.round(speed * 255.0);
-        sendCommand(this.address, command, rawSpeed);
+        await sendCommand(this.address, command, rawSpeed);
     }
 
-    goAhead(speed) {
-        this.setSpeed("left", speed);
-        this.setSpeed("right", speed);
+    async goAhead(speed) {
+        await Promise.all([
+            this.setSpeed("left", speed),
+            this.setSpeed("right", speed)
+        ]);
     }
 
     /**
      * Start rotating. A positive speed means rotating clockwise.
      */
-    rotate(speed) {
-        this.setSpeed("left", speed);
-        this.setSpeed("right", -speed);
+    async rotate(speed) {
+        await Promise.all([
+            this.setSpeed("left", speed),
+            this.setSpeed("right", -speed)
+        ]);
     }
 
-    stop() {
-        this.goAhead(0);
+    async stop() {
+        await this.goAhead(0);
     }
 }
 
