@@ -11,7 +11,7 @@ int main() {
 	ms_open();
 	do{
 		ms_update();
-		printf("yaw=%f,pitch=%f,roll=%f,temperature=%f\n",
+		printf(";yaw=%f,pitch=%f,roll=%f,temperature=%f\n",
 		 ypr[YAW], ypr[PITCH], ypr[ROLL],temp);
 		delay_ms(5);
 	}while(1);

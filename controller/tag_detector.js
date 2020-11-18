@@ -86,4 +86,4 @@ class TagDetector extends EventEmitter {
     }
 }
 
-module.exports = { TagDetector }
+module.exports = TagDetector;
