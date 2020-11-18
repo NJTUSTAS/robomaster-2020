@@ -10,7 +10,7 @@ function parseOutputLine(line) {
     }
 
     const fields = {};
-    for (const fieldStr of detectionStr.split(",")) {
+    for (const fieldStr of line.split(",")) {
         const idxEqual = fieldStr.indexOf("=");
         fields[fieldStr.substring(0, idxEqual)] = parseFloat(fieldStr.substring(idxEqual + 1));
     }

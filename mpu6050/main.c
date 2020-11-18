@@ -13,6 +13,7 @@ int main() {
 		ms_update();
 		printf(";yaw=%f,pitch=%f,roll=%f,temperature=%f\n",
 		 ypr[YAW], ypr[PITCH], ypr[ROLL],temp);
+		fflush(stdout);
 		delay_ms(5);
 	}while(1);
 
