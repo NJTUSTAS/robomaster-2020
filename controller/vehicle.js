@@ -1,5 +1,6 @@
 const I2CDevice = require("./i2c");
 const { EventEmitter } = require("events");
+const sleep = require("await-sleep");
 
 const END_OF_MSG = 79;
 
@@ -10,8 +11,17 @@ class Vehicle extends I2CDevice {
 
         this.sensors = new EventEmitter();
         (async () => {
-            while (true)
-                this._readMessage();
+            while (true) {
+                try {
+                    await this._readMessage();
+                } catch (e) {
+                    console.warn(`vehicle@${this.address}: read error: ${e}`);
+                    if (e.errno === -121 && e.code === "EREMOTEIO" && e.syscall === "read") {
+                        // device is not connected
+                        await sleep(500);
+                    }
+                }
+            }
         })();
     }
 
@@ -35,14 +45,14 @@ class Vehicle extends I2CDevice {
                         break;
 
                     default:
-                        console.warn(`vehicle@${address}: unknown message type; ${buffer.toString("hex")}`);
+                        console.warn(`vehicle@${this.address}: unknown message type; ${buffer.toString("hex")}`);
                         break;
                 }
             } else {
-                console.warn(`vehicle@${address}: message with no end; ${buffer.toString("hex")}`);
+                console.warn(`vehicle@${this.address}: message with no end; ${buffer.toString("hex")}`);
             }
         } else {
-            console.warn(`vehicle@${address}: read ${bytesRead}, expected 4; ${buffer.toString("hex")}`);
+            console.warn(`vehicle@${this.address}: read ${bytesRead}, expected 4; ${buffer.toString("hex")}`);
         }
     }
 
@@ -52,7 +62,7 @@ class Vehicle extends I2CDevice {
      */
     _fireDistanceEvent(direction, distance) {
         if (distance < 0 && distance !== -1 && distance !== -2) {
-            console.warn(`vehicle@${address}: illegal distance ${direction}: ${distance}`);
+            console.warn(`vehicle@${this.address}: illegal distance ${direction}: ${distance}`);
         }
         this.sensors.emit("distance", {
             direction: direction,
@@ -65,14 +75,14 @@ class Vehicle extends I2CDevice {
      * @param {number} command uint8
      * @param {number} data uint16
      */
-    async _sendCommand(address, command, data) {
+    async _sendCommand(command, data) {
         await this._i2cWrite(Buffer.from([
             command.charCodeAt(0),
             (data >> 8) & 0xff,
             data & 0xff,
             END_OF_MSG
         ]));
-        console.debug(`vehicle@${address}: ${command.charAt(0)} ${data}`);
+        console.debug(`vehicle@${this.address}: ${command.charAt(0)} ${data}`);
     }
 
     /**
@@ -93,11 +103,11 @@ class Vehicle extends I2CDevice {
         }
         speed = Math.abs(speed);
         if (speed > this.speedLimit) {
-            console.warn(`vehicle@${address}: speeding! trying to set speed to ${speed}`);
+            console.warn(`vehicle@${this.address}: speeding! trying to set speed to ${speed}`);
             speed = this.speedLimit;
         }
         const rawSpeed = Math.round(speed * 0xffff);
-        await sendCommand(this.address, command, rawSpeed);
+        await this._sendCommand(command, rawSpeed);
     }
 
     async goAhead(speed) {
