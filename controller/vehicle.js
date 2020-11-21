@@ -6,8 +6,18 @@ class Vehicle extends I2CDevice {
         this.speedLimit = 1.0;
     }
 
+    /**
+     * @param {number} address uint8
+     * @param {number} command uint8
+     * @param {number} data uint16
+     */
     async _sendCommand(address, command, data) {
-        await this._i2cWrite(Buffer.from([command.charCodeAt(0), data, 79]));
+        await this._i2cWrite(Buffer.from([
+            command.charCodeAt(0),
+            (data >> 8) & 0xff,
+            data & 0xff,
+            79
+        ]));
         console.debug(`vehicle@${address}: ${command.charAt(0)} ${data}`);
     }
 
@@ -32,7 +42,7 @@ class Vehicle extends I2CDevice {
             console.warn(`vehicle@${address}: speeding! trying to set speed to ${speed}`);
             speed = this.speedLimit;
         }
-        const rawSpeed = Math.round(speed * 255.0);
+        const rawSpeed = Math.round(speed * 0xffff);
         await sendCommand(this.address, command, rawSpeed);
     }
 
