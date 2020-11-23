@@ -2,8 +2,6 @@ const I2CDevice = require("./i2c");
 const { EventEmitter } = require("events");
 const sleep = require("await-sleep");
 
-const END_OF_MSG = 79;
-
 class Vehicle extends I2CDevice {
     constructor(address = 0x04) {
         super(address);
@@ -16,71 +14,38 @@ class Vehicle extends I2CDevice {
                     await this._readMessage();
                 } catch (e) {
                     console.warn(`vehicle@${this.address}: read error: ${e}`);
-                    if (e.errno === -121 && e.code === "EREMOTEIO" && e.syscall === "read") {
-                        // device is not connected
-                        await sleep(500);
-                    }
                 }
+                await sleep(100);
             }
         })();
     }
 
     async _readMessage() {
-        const { bytesRead, buffer } = await this.bus.i2cRead(this.address, 4, Buffer.alloc(4));
-        if (bytesRead === 4) {
-            const command = String.fromCharCode(buffer.readUInt8(0));
-            const data = buffer.readUInt16BE(1);
-            if (buffer.readUInt8(3) === END_OF_MSG) {
-                switch (command) {
-                    case "f":
-                        this._fireDistanceEvent("front", data);
-                        break;
-
-                    case "l":
-                        this._fireDistanceEvent("left", data);
-                        break;
-
-                    case "r":
-                        this._fireDistanceEvent("right", data);
-                        break;
-
-                    default:
-                        console.warn(`vehicle@${this.address}: unknown message type; ${buffer.toString("hex")}`);
-                        break;
-                }
-            } else {
-                console.warn(`vehicle@${this.address}: message with no end; ${buffer.toString("hex")}`);
-            }
-        } else {
-            console.warn(`vehicle@${this.address}: read ${bytesRead}, expected 4; ${buffer.toString("hex")}`);
+        const buf = Buffer.alloc(8);
+        const { bytesRead } = await this.bus.i2cRead(this.address, buf.length, buf);
+        if (bytesRead !== buf.length) {
+            console.warn(`vehicle@${this.address}: read ${bytesRead}, expected ${buf.length}; ${buffer.toString("hex")}`);
+            return;
         }
+
+        const sensorData = {
+            forward: buf.readUInt16BE(0),
+            back: buf.readUInt16BE(2),
+            left: buf.readUInt16BE(4),
+            right: buf.readUInt16BE(6)
+        };
+        this.sensors.emit("sensor", sensorData);
     }
 
     /**
-     * @param {"front"|"left"|"right"} direction Sensor name
-     * @param {number} distance Distance in mm, -1 if it's too far, -2 if sensor is not connected
-     */
-    _fireDistanceEvent(direction, distance) {
-        if (distance < 0 && distance !== -1 && distance !== -2) {
-            console.warn(`vehicle@${this.address}: illegal distance ${direction}: ${distance}`);
-        }
-        this.sensors.emit("distance", {
-            direction: direction,
-            distance: distance
-        });
-    }
-
-    /**
-     * @param {number} address uint8
-     * @param {number} command uint8
+     * @param {string} command char
      * @param {number} data uint16
      */
     async _sendCommand(command, data) {
         await this._i2cWrite(Buffer.from([
             command.charCodeAt(0),
             (data >> 8) & 0xff,
-            data & 0xff,
-            END_OF_MSG
+            data & 0xff
         ]));
         console.debug(`vehicle@${this.address}: ${command.charAt(0)} ${data}`);
     }
