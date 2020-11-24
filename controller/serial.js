@@ -4,6 +4,7 @@ class Serial {
     constructor(path = "/dev/ttyS0", baudRate = 57600) {
         this.path = path;
         this.baudRate = baudRate;
+        this._openPort();
     }
 
     _openPort() {
@@ -20,11 +21,11 @@ class Serial {
             const retVal = this.port.write(buf, (error, bytesWritten) => {
                 if (error !== null && error !== undefined) {
                     reject(error);
-                }
-                if (bytesWritten !== buf.length) {
+                } else if (bytesWritten !== buf.length) {
                     reject(new Error(`Only ${bytesWritten} bytes written, expect ${buf.length}`));
+                } else {
+                    resolve();
                 }
-                resolve();
             });
             if (retVal !== true) {
                 reject(new Error("write returns " + retVal));
