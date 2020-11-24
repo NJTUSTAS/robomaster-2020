@@ -69,7 +69,7 @@ class Vehicle extends EventEmitter {
                 command = speed < 0.0 ? "r" : "R";
                 break;
             default:
-                throw `illegal wheel ${wheel}`;
+                throw new Error(`illegal wheel ${wheel}`);
         }
         speed = Math.abs(speed);
         if (speed > this.speedLimit) {
