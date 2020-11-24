@@ -21,8 +21,8 @@ class Serial {
             const retVal = this.port.write(buf, (error, bytesWritten) => {
                 if (error !== null && error !== undefined) {
                     reject(error);
-                } else if (bytesWritten !== buf.length) {
-                    reject(new Error(`Only ${bytesWritten} bytes written, expect ${buf.length}`));
+                // } else if (bytesWritten !== buf.length) {
+                //     reject(new Error(`Only ${bytesWritten} bytes written, expect ${buf.length}`));
                 } else {
                     resolve();
                 }
