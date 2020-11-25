@@ -1,4 +1,5 @@
 #include "mbed.h"
+#include "sonar.h"
 
 const PinName PIN_PWM_LEFT = D2;      // ENA
 const PinName PIN_PWM_RIGHT = D3;     // ENB
@@ -8,6 +9,12 @@ const PinName PIN_FORWARD_RIGHT = D6; // IN3
 const PinName PIN_BACK_RIGHT = D7;    // IN4
 const PinName PIN_PWM_SERVO_YAW = D8;
 const PinName PIN_PWM_SERVO_PITCH = D9;
+const PinName PIN_SONAR_FRONT_TRIG = A0;
+const PinName PIN_SONAR_FRONT_ECHO = A1;
+const PinName PIN_SONAR_LEFT_TRIG = A2;
+const PinName PIN_SONAR_LEFT_ECHO = A3;
+const PinName PIN_SONAR_RIGHT_TRIG = A4;
+const PinName PIN_SONAR_RIGHT_ECHO = A5;
 
 PwmOut pwm_left(PIN_PWM_LEFT);
 PwmOut pwm_right(PIN_PWM_RIGHT);
@@ -17,6 +24,13 @@ DigitalOut forward_right(PIN_FORWARD_RIGHT);
 DigitalOut back_right(PIN_BACK_RIGHT);
 PwmOut pwm_servo_yaw(PIN_PWM_SERVO_YAW);
 PwmOut pwm_servo_pitch(PIN_PWM_SERVO_PITCH);
+
+Sonar sonar_front(PIN_SONAR_FRONT_TRIG, PIN_SONAR_FRONT_ECHO);
+Sonar sonar_left(PIN_SONAR_LEFT_TRIG, PIN_SONAR_LEFT_ECHO);
+Sonar sonar_right(PIN_SONAR_RIGHT_TRIG, PIN_SONAR_RIGHT_ECHO);
+
+UnbufferedSerial serial(PA_11, PA_12, 57600);
+DigitalOut led(LED_RED);
 
 void process_message(const char *buf) {
 	uint16_t data = (((uint16_t)buf[1]) << 8) | ((uint16_t)buf[2]);
@@ -78,8 +92,12 @@ void process_message(const char *buf) {
 		break;
 
 	case 'v': // servo pitch
-	    // For Wen's: range 3000 (maxinum angle) ~ 6000 (mininum angle)
-	    // For Xu's: 3800 (mininum angle) ~ 6800 (maxinum angle) (4700: parallel)
+
+		// For Wen's: range 3000 (maxinum angle) ~ 6000 (mininum angle)
+
+		// For Xu's: 3800 (mininum angle) ~ 6800 (maxinum angle)
+		// (4700: parallel)
+
 		pwm_servo_pitch = ((float)data) / 0xffff;
 		break;
 	}
@@ -111,9 +129,6 @@ void serial_receive(char data) {
 	}
 }
 
-UnbufferedSerial serial(PA_11, PA_12, 57600);
-DigitalOut led(LED_RED);
-
 int main() {
 	pwm_left = 0.0;
 	pwm_right = 0.0;
@@ -133,6 +148,10 @@ int main() {
 
 	printf("hello, world\n");
 
-	while (true)
-		ThisThread::yield();
+	while (true) {
+		int distance = sonar_right.detect_distance();
+		printf("%d mm\n", distance);
+		ThisThread::sleep_for(100ms);
+		// ThisThread::yield();
+	}
 }
