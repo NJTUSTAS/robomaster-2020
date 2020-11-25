@@ -20,7 +20,7 @@ PwmOut pwm_servo_pitch(PIN_PWM_SERVO_PITCH);
 
 void process_message(const char *buf) {
 	uint16_t data = (((uint16_t)buf[1]) << 8) | ((uint16_t)buf[2]);
-	printf("command: %c %d\n", buf[0], (int)data);
+	// printf("command: %c %d\n", buf[0], (int)data);
 
 	// lowercase means backwards
 	// UPPERCASE means forwad
@@ -78,14 +78,14 @@ void process_message(const char *buf) {
 		break;
 
 	case 'v': // servo pitch
-        // For Wen's: range 3000 (maxinum angle) ~ 6000 (mininum angle)
-        // For Xu's: 3800 (mininum angle) ~ 6800 (maxinum angle) (4700: parallel)
+	    // For Wen's: range 3000 (maxinum angle) ~ 6000 (mininum angle)
+	    // For Xu's: 3800 (mininum angle) ~ 6800 (maxinum angle) (4700: parallel)
 		pwm_servo_pitch = ((float)data) / 0xffff;
 		break;
 	}
 }
 
-void accept_rx(char data) {
+void serial_receive(char data) {
 	static char buf[3];
 	static int pos = 0;
 	static int zero_count = 0;
@@ -111,7 +111,7 @@ void accept_rx(char data) {
 	}
 }
 
-BufferedSerial serial(PA_11, PA_12, 57600);
+UnbufferedSerial serial(PA_11, PA_12, 57600);
 DigitalOut led(LED_RED);
 
 int main() {
@@ -121,20 +121,18 @@ int main() {
 	back_left = 0;
 	forward_right = 0;
 	back_right = 0;
+	led = 0;
+
+	serial.attach([] {
+		char c;
+		led = !led;
+		if (serial.read(&c, 1)) {
+			serial_receive(c);
+		}
+	});
 
 	printf("hello, world\n");
-	led = 0;
-	while (true) {
-		char buf[16];
-		int read = serial.read(buf, 16);
-		if (read < 0) {
-			printf("error reading serial: %d\n", read);
-			continue;
-		}
-		for (int i = 0; i < read; i++) {
-			accept_rx(buf[i]);
-		}
 
-		led = !led;
-	}
+	while (true)
+		ThisThread::yield();
 }
