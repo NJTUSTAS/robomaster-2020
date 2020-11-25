@@ -12,7 +12,6 @@ class Motor extends I2CDevice {
     constructor(address = 0x40) {
         super(address);
         this.speedLimit = 1.0;
-        this._begin();
     }
 
     async _write8(addr, d) {
@@ -54,7 +53,7 @@ class Motor extends I2CDevice {
         await this._write8(0x00, oldmode | 0x80 | 0x20);
     }
 
-    async _begin() {
+    async begin() {
         await this._reset();
         await this._setPWMFreq(1000);
     }
