@@ -24,4 +24,6 @@ remoteControl.on("mode", result => {
 });
 
 const vehicle = new Vehicle();
-
+vehicle.on("sonar", result => {
+    console.log(JSON.stringify(result));
+});

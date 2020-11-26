@@ -38,14 +38,6 @@ class Serial {
             }
         });
     }
-
-    /**
-     * @param {Buffer} buf
-     * @returns {number} bytes read
-     */
-    async read(buf) {
-        // TODO
-    }
 }
 
 module.exports = Serial;
