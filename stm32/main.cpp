@@ -29,10 +29,12 @@ Sonar sonar_front(PIN_SONAR_FRONT_TRIG, PIN_SONAR_FRONT_ECHO);
 Sonar sonar_left(PIN_SONAR_LEFT_TRIG, PIN_SONAR_LEFT_ECHO);
 Sonar sonar_right(PIN_SONAR_RIGHT_TRIG, PIN_SONAR_RIGHT_ECHO);
 
-UnbufferedSerial serial(PA_11, PA_12, 57600);
+UnbufferedSerial serial(PA_11, PA_12, 115200);
+UnbufferedSerial usb_serial(USBTX, USBRX, 115200);
 DigitalOut led(LED_RED);
 
 void process_message(const char *buf) {
+    led = !led;
 	uint16_t data = (((uint16_t)buf[1]) << 8) | ((uint16_t)buf[2]);
 	// printf("command: %c %d\n", buf[0], (int)data);
 
@@ -129,6 +131,17 @@ void serial_receive(char data) {
 	}
 }
 
+void perform_detection(Sonar &sonar, char command) {
+	int16_t distance = sonar.detect_distance();
+	const char buf[] = {0x00,
+	                    0x00,
+	                    0x00,
+	                    command,
+	                    (char)((distance >> 8) & 0xff),
+	                    (char)(distance & 0xff)};
+	serial.write(buf, 6);
+}
+
 int main() {
 	pwm_left = 0.0;
 	pwm_right = 0.0;
@@ -140,7 +153,6 @@ int main() {
 
 	serial.attach([] {
 		char c;
-		led = !led;
 		if (serial.read(&c, 1)) {
 			serial_receive(c);
 		}
@@ -149,9 +161,11 @@ int main() {
 	printf("hello, world\n");
 
 	while (true) {
-		int distance = sonar_right.detect_distance();
-		printf("%d mm\n", distance);
 		ThisThread::sleep_for(100ms);
-		// ThisThread::yield();
+		perform_detection(sonar_front, 'f');
+		ThisThread::sleep_for(100ms);
+		perform_detection(sonar_left, 'l');
+		ThisThread::sleep_for(100ms);
+		perform_detection(sonar_right, 'r');
 	}
 }
