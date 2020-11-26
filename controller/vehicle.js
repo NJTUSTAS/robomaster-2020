@@ -20,7 +20,7 @@ class Vehicle extends EventEmitter {
         let recvbuf_zeroCount = 0;
         const processMessage = buf => {
             const sensor_id = String.fromCharCode(buf[0]);
-            const data = buf.readInt16BE(buf, 1);
+            const data = buf.readInt16BE(1);
             const sonar_direction = recv_sensor_mapping[sensor_id];
             if (typeof sonar_direction !== "string") {
                 console.warn(`vehicle: received illegal command ${sensor_id}`);
