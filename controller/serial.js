@@ -3,7 +3,6 @@ const SerialPort = require("serialport");
 class Serial {
     constructor(path = "/dev/ttyAMA0") {
         this.path = path;
-        this.baudRate = baudRate;
         this._openPort();
     }
 
