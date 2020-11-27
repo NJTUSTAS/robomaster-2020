@@ -1,3 +1,5 @@
+const I2CDevice = require("./i2c");
+
 "use strict";
 class PID {
   constructor(k_p, k_i, k_d, dt) {
@@ -73,6 +75,25 @@ class PID {
   }
 }
 
-module.exports = Controller;
+class fix extends PID
+{
+    constructor(P,I,D,T,Left_distance,Right_distance,speed){
+        super(P,I,D,T);
+        this.Left_distance=Left_distance;
+        this.Right_distance=Right_distance;
+        this.speed=speed;
+    }
+    static Iteration(){
+        this.setTarget(35);
+        this.update(Left_distance);
+        
+    }
+    
+
+
+}
+
+
+//module.exports = Controller;
 
 
