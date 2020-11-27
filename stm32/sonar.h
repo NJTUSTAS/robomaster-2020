@@ -19,8 +19,9 @@ class Sonar {
 	int correction;
 
   public:
-	Sonar(PinName p_trigger, PinName p_echo)
+	explicit Sonar(PinName p_trigger, PinName p_echo)
 	    : trigger{DigitalOut(p_trigger)}, echo(DigitalIn(p_echo, PullDown)) {
+		trigger = 0;
 		echo0Timer.reset();
 		echo0Timer.start();
 		sonar.reset();

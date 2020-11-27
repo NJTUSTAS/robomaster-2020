@@ -104,6 +104,15 @@ class Vehicle extends EventEmitter {
         await this._sendCommand(command, rawSpeed);
     }
 
+    /**
+     * @param {number} duration How long is the SIG pin pulled up (ms)
+     */
+    async shot(duration = 100) {
+        await this._sendCommand("s", 1);
+        await sleep(duration);
+        await this._sendCommand("s", 0);
+    }
+
     async goAhead(speed) {
         await Promise.all([
             this.setSpeed("left", speed),

@@ -15,6 +15,7 @@ const PinName PIN_SONAR_LEFT_TRIG = A2;
 const PinName PIN_SONAR_LEFT_ECHO = A3;
 const PinName PIN_SONAR_RIGHT_TRIG = A4;
 const PinName PIN_SONAR_RIGHT_ECHO = A5;
+const PinName PIN_GUN_SIG = PD_2;
 
 PwmOut pwm_left(PIN_PWM_LEFT);
 PwmOut pwm_right(PIN_PWM_RIGHT);
@@ -24,6 +25,7 @@ DigitalOut forward_right(PIN_FORWARD_RIGHT);
 DigitalOut back_right(PIN_BACK_RIGHT);
 PwmOut pwm_servo_yaw(PIN_PWM_SERVO_YAW);
 PwmOut pwm_servo_pitch(PIN_PWM_SERVO_PITCH);
+DigitalOut gun_sig(PIN_GUN_SIG);
 
 Sonar sonar_front(PIN_SONAR_FRONT_TRIG, PIN_SONAR_FRONT_ECHO);
 Sonar sonar_left(PIN_SONAR_LEFT_TRIG, PIN_SONAR_LEFT_ECHO);
@@ -34,7 +36,7 @@ UnbufferedSerial usb_serial(USBTX, USBRX, 115200);
 DigitalOut led(LED_RED);
 
 void process_message(const char *buf) {
-    led = !led;
+	led = !led;
 	uint16_t data = (((uint16_t)buf[1]) << 8) | ((uint16_t)buf[2]);
 	// printf("command: %c %d\n", buf[0], (int)data);
 
@@ -102,6 +104,14 @@ void process_message(const char *buf) {
 
 		pwm_servo_pitch = ((float)data) / 0xffff;
 		break;
+
+	case 's': // gun signal
+		if (data == 0) {
+			gun_sig = 0;
+		} else if (data == 1) {
+			gun_sig = 1;
+		}
+		break;
 	}
 }
 
@@ -149,6 +159,7 @@ int main() {
 	back_left = 0;
 	forward_right = 0;
 	back_right = 0;
+	gun_sig = 0;
 	led = 0;
 
 	serial.attach([] {
