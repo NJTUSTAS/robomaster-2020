@@ -1,15 +1,23 @@
 const SerialPort = require("serialport");
 
 class Serial {
-    constructor(path = "/dev/ttyS0", baudRate = 57600) {
+    constructor(path = "/dev/ttyAMA0") {
         this.path = path;
-        this.baudRate = baudRate;
         this._openPort();
     }
 
     _openPort() {
         this.port = new SerialPort(this.path, {
-            baudRate: this.baudRate
+            autoOpen: true,
+            baudRate: 115200,
+            dataBits: 8,
+            lock: true,
+            stopBits: 1,
+            parity: "none",
+            rtscts: false,
+            xon: false,
+            xoff: false,
+            xany: false
         });
     }
 
@@ -21,8 +29,6 @@ class Serial {
             const retVal = this.port.write(buf, (error, bytesWritten) => {
                 if (error !== null && error !== undefined) {
                     reject(error);
-                // } else if (bytesWritten !== buf.length) {
-                //     reject(new Error(`Only ${bytesWritten} bytes written, expect ${buf.length}`));
                 } else {
                     resolve();
                 }
@@ -31,14 +37,6 @@ class Serial {
                 reject(new Error("write returns " + retVal));
             }
         });
-    }
-
-    /**
-     * @param {Buffer} buf
-     * @returns {number} bytes read
-     */
-    async read(buf) {
-        // TODO
     }
 }
 

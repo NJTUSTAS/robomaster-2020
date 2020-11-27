@@ -2,43 +2,67 @@ const { EventEmitter } = require("events");
 const sleep = require("await-sleep");
 const Serial = require("./serial");
 
+const recv_sensor_mapping = {
+    f: "front",
+    l: "left",
+    r: "right",
+    b: "back"
+}
+
 class Vehicle extends EventEmitter {
     constructor() {
         super();
         this.speedLimit = 1.0;
         this.serial = new Serial();
 
-        /*
-        (async () => {
-            while (true) {
-                try {
-                    await this._readMessage();
-                } catch (e) {
-                    console.warn(`vehicle: read error: ${e}`);
-                }
-                await sleep(100);
-            }
-        })();
-        */
-    }
-    /*
-        async _readMessage() {
-            const buf = Buffer.alloc(8);
-            const { bytesRead } = await this.bus.i2cRead(this.address, buf.length, buf);
-            if (bytesRead !== buf.length) {
-                console.warn(`vehicle: read ${bytesRead}, expected ${buf.length}; ${buffer.toString("hex")}`);
+        const recvbuf = Buffer.alloc(6);
+        let recvbuf_pos = 0;
+        let recvbuf_zeroCount = 0;
+        const processMessage = buf => {
+            const sensor_id = String.fromCharCode(buf[0]);
+            const data = buf.readInt16BE(1);
+            const sonar_direction = recv_sensor_mapping[sensor_id];
+            if (typeof sonar_direction !== "string") {
+                console.warn(`vehicle: received illegal command ${sensor_id}`);
                 return;
             }
-
-            const sensorData = {
-                forward: buf.readUInt16BE(0),
-                back: buf.readUInt16BE(2),
-                left: buf.readUInt16BE(4),
-                right: buf.readUInt16BE(6)
-            };
-            this.sensors.emit("sensor", sensorData);
+            if (data < 0 && data !== -1 && data !== -2) {
+                console.warn(`vehicle: received illegal data from sonar ${sonar_direction}: ${data}`);
+                return;
+            }
+            this.emit("sonar", {
+                direction: sonar_direction,
+                distance: data
+            });
         }
-    */
+        const onSerialReceive = data => {
+            if (recvbuf_zeroCount === 3) {
+                if (data === 0 && recvbuf_pos == 0) {
+                    // the first byte of msg must not be zero
+                    // skip to find message head
+                } else {
+                    recvbuf[recvbuf_pos++] = data;
+                    if (recvbuf_pos === 3) {
+                        processMessage(recvbuf);
+                        recvbuf_zeroCount = 0;
+                        recvbuf_pos = 0;
+                    }
+                }
+            } else {
+                if (data == 0) {
+                    recvbuf_zeroCount++;
+                } else {
+                    recvbuf_zeroCount = 0;
+                }
+            }
+        }
+        this.serial.port.on("data", buf => {
+            for (const b of buf) {
+                onSerialReceive(b);
+            }
+        });
+    }
+
     /**
      * @param {string} command char
      * @param {number} data uint16
@@ -78,6 +102,15 @@ class Vehicle extends EventEmitter {
         }
         const rawSpeed = Math.round(speed * 0xffff);
         await this._sendCommand(command, rawSpeed);
+    }
+
+    /**
+     * @param {number} duration How long is the SIG pin pulled up (ms)
+     */
+    async shot(duration = 100) {
+        await this._sendCommand("s", 1);
+        await sleep(duration);
+        await this._sendCommand("s", 0);
     }
 
     async goAhead(speed) {
