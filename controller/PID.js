@@ -25,7 +25,7 @@ class PID {
         this.lastError = 0;
         this.lastTime = 0;
 
-        this.target = 0; 
+        this.target = 0;
     }
 
     setTarget(target) {
@@ -40,10 +40,10 @@ class PID {
         let dt = this.dt;
         if (!dt) {
             let currentTime = Date.now();
-            if (this.lastTime === 0) { 
+            if (this.lastTime === 0) {
                 dt = 0;
             } else {
-                dt = (currentTime - this.lastTime) / 1000; 
+                dt = (currentTime - this.lastTime) / 1000;
             }
             this.lastTime = currentTime;
         }
@@ -72,29 +72,26 @@ class PID {
 }
 
 class fix extends PID {
-    constructor(P, I, D, T, Left_distance, Right_distance, speed) {
+    constructor(P, I, D, T) {
         super(P, I, D, T);
+    }
+    static Angle() {  //角度计算
+        const X = 70;
+        return Math.acos(X / sum);
+    }
+    static input(Left_distance, Right_distance, speed) {  //输入函数
         this.Left_distance = Left_distance;
         this.Right_distance = Right_distance;
         this.speed = speed;
         this.sum = Left_distance + Right_distance;
     }
-    static Angle() {
-        const X = 70;
-        return Math.acos(X / sum);
-    }
-    static achieve(gain);
-    static input() {
-    }
-
+    static achieve(gain); //实现函数
     static Iteration() {
         for (let index = 0; index < 100; index++) {
             this.input();
-            gain = this.update();
-            this.achieve(gain);
+            this.achieve(this.update(this.Angle));
             sleep(1000);
         }
-
     }
 }
 
