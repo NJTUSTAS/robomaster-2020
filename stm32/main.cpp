@@ -13,8 +13,8 @@ const PinName PIN_SONAR_FRONT_TRIG = A0;
 const PinName PIN_SONAR_FRONT_ECHO = A1;
 const PinName PIN_SONAR_LEFT_TRIG = A2;
 const PinName PIN_SONAR_LEFT_ECHO = A3;
-const PinName PIN_SONAR_RIGHT_TRIG = A4;
-const PinName PIN_SONAR_RIGHT_ECHO = A5;
+const PinName PIN_SONAR_RIGHT_TRIG = /*A4*/ PC_2;
+const PinName PIN_SONAR_RIGHT_ECHO = /*A5*/ PC_3;
 const PinName PIN_GUN_SIG = PD_2;
 
 PwmOut pwm_left(PIN_PWM_LEFT);
