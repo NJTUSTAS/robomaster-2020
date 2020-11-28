@@ -1,6 +1,5 @@
-const I2CDevice = require("./i2c");
-
 "use strict";
+const sleep = require("await-sleep");
 class PID {
   constructor(k_p, k_i, k_d, dt) {
     let i_max;
@@ -77,17 +76,33 @@ class PID {
 
 class fix extends PID
 {
-    constructor(P,I,D,T,Left_distance,Right_distance,speed){
+    constructor(P,I,D,T,Left_distance1,Left_distance2,Right_distance1,Right_distance2,speed){
         super(P,I,D,T);
-        this.Left_distance=Left_distance;
-        this.Right_distance=Right_distance;
+        this.Left_distance1=Left_distance1;
+        this.Left_distance2=Left_distance2;
+        this.Right_distance1=Right_distance1;
+        this.Right_distance2=Right_distance2;
         this.speed=speed;
+        this.sum=Left_distance+Right_distance;
     }
+    static Angle(distance1,distance2)
+    {
+       var Delta=Math.abs(distance1-distance2);
+       const X=12;
+       return (Math.atan(X,Delta));
+    }
+    gain=update(Angle);
+    sleep(1000);  
+
+
+
+
     static Iteration(){
         this.setTarget(35);
         this.update(Left_distance);
         
     }
+
     
 
 
@@ -95,5 +110,3 @@ class fix extends PID
 
 
 //module.exports = Controller;
-
-
