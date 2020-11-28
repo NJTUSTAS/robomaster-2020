@@ -110,10 +110,6 @@ async function Leftturn(speed,time)
     await go_ahead(0.5,1000);
     await Rightturn(0.5,1000);
 
- 
-
-
-
 })();
 
 module.exports = {
