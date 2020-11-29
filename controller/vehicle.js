@@ -113,6 +113,16 @@ class Vehicle extends EventEmitter {
         await this._sendCommand("s", 0);
     }
 
+    async setYaw(value) {
+        await this._sendCommand("u", value);
+    }
+
+    async setPitch(value) {
+        await this._sendCommand("v", value);
+    }
+
+    // ==== Helper functions ====
+
     async goAhead(speed) {
         await Promise.all([
             this.setSpeed("left", speed),
@@ -133,6 +143,8 @@ class Vehicle extends EventEmitter {
     async stop() {
         await this.goAhead(0);
     }
+
+    // ========
 }
 
 module.exports = Vehicle;
