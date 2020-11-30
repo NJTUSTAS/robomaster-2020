@@ -77,6 +77,7 @@ class Vehicle extends EventEmitter {
             data & 0xff
         ]));
         console.debug(`vehicle: ${command.charAt(0)} ${data}`);
+	    this.serial.port.flush();
     }
 
     /**

@@ -104,13 +104,13 @@ async function Leftturn(speed,time)
     await stop();
 }
 
-(async () => {
-
-    await motor.begin();
-    await go_ahead(0.5,1000);
-    await Rightturn(0.5,1000);
-
-})();
+//(async () => {
+//
+//    await motor.begin();
+//    await go_ahead(0.5,1000);
+//    await Rightturn(0.5,1000);
+//
+//})();
 
 module.exports = {
     begin:motor.begin,
