@@ -222,6 +222,16 @@ class ShotTargetAction {
         });
         this.tag_detector.removeListener("frame", this.frameListener);
     }
+
+    /**
+    * @param {TagDetector} tag_detector
+    * @param {Motor} motor
+    * @param {Vehicle} vehicle
+    * @param {Array<number>} targets
+    */
+    static async doAction(tag_detector, motor, vehicle, targets) {
+        await new ShotTargetAction(tag_detector, motor, vehicle, targets).perform();
+    }
 }
 
 module.exports = ShotTargetAction;
