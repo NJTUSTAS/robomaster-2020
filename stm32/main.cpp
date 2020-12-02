@@ -99,8 +99,8 @@ void process_message(const char *buf) {
 
 		// For Wen's: range 3000 (maxinum angle) ~ 6000 (mininum angle)
 
-		// For Xu's: 3800 (mininum angle) ~ 6800 (maxinum angle)
-		// (4700: parallel)
+		// For Xu's: 3200 (mininum angle) ~ 6300 (maxinum angle)
+		// (4100: parallel)
 
 		pwm_servo_pitch = ((float)data) / 0xffff;
 		break;
