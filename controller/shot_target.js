@@ -179,7 +179,7 @@ class ShotTargetAction {
             }
 
             const now = Date.now();
-            const tag_found = find_center(tag_targets[shot_progress], detect_result) !== null;
+            const tag_found = find_center(targets[shot_progress], detect_result) !== null;
             if (tag_found) {
                 console.log(`Tag #${follower.tag} found`);
             }
@@ -210,11 +210,12 @@ class ShotTargetAction {
         };
 
         this.tag_detector = tag_detector;
+        this.vehicle = vehicle;
+        next_tag();
     }
 
     async perform() {
-        await vehicle.setPitch(pitch);
-        next_tag();
+        await this.vehicle.setPitch(pitch_initial);
         await new Promise(resolve => {
             this._resolve = resolve;
             this.tag_detector.addListener("frame", this.frameListener);
