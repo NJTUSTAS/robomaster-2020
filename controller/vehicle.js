@@ -108,7 +108,7 @@ class Vehicle extends EventEmitter {
     /**
      * @param {number} duration How long is the SIG pin pulled up (ms)
      */
-    async shot(duration = 100) {
+    async shot(duration = 200) {
         await this._sendCommand("s", 1);
         await sleep(duration);
         await this._sendCommand("s", 0);
