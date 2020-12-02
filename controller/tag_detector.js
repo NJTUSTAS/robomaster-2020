@@ -53,10 +53,10 @@ function parseOutputLine(line) {
 }
 
 class TagDetector extends EventEmitter {
-    constructor() {
+    constructor(executable = "./tag_detector") {
         super();
 
-        this.process = spawn("./tag_detector", [
+        this.process = spawn(executable, [
             "--camera-width", "1024",
             "--camera-height", "768",
             "--threads", "4",
