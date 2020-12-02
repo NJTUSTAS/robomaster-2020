@@ -57,8 +57,8 @@ class TagDetector extends EventEmitter {
         super();
 
         this.process = spawn("./tag_detector", [
-            "--camera-width", "960",
-            "--camera-height", "720",
+            "--camera-width", "1024",
+            "--camera-height", "768",
             "--threads", "4",
             "--decimate", "2.0"
         ]);
