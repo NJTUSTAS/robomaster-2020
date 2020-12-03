@@ -11,7 +11,7 @@ const pitch_max = 6300;
 const skip_duration = 3000;
 const retry_duration = 2000;
 const stable_duration = 500;
-const shot_detect_delay = 500;
+const shot_detect_delay = 1000;
 
 function find_center(tag_id, detect_result) {
     for (const det of detect_result.detections) {
