@@ -143,31 +143,6 @@ class Vehicle extends EventEmitter {
         }
         await this._sendCommand("T", x);
     }
-
-    // ==== Helper functions ====
-
-    async goAhead(speed) {
-        await Promise.all([
-            this.setSpeed("left", speed),
-            this.setSpeed("right", speed)
-        ]);
-    }
-
-    /**
-     * Start rotating. A positive speed means rotating clockwise.
-     */
-    async rotate(speed) {
-        await Promise.all([
-            this.setSpeed("left", speed),
-            this.setSpeed("right", -speed)
-        ]);
-    }
-
-    async stop() {
-        await this.goAhead(0);
-    }
-
-    // ========
 }
 
 module.exports = Vehicle;
