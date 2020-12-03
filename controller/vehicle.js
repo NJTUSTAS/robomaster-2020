@@ -77,7 +77,7 @@ class Vehicle extends EventEmitter {
             data & 0xff
         ]));
         console.debug(`vehicle: ${command.charAt(0)} ${data}`);
-	    this.serial.port.flush();
+        this.serial.port.flush();
     }
 
     /**
@@ -120,6 +120,10 @@ class Vehicle extends EventEmitter {
 
     async setPitch(value) {
         await this._sendCommand("v", value);
+    }
+
+    async setSonarInterval(time_ms) {
+        await this._sendCommand("t", value);
     }
 
     // ==== Helper functions ====

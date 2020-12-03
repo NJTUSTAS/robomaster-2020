@@ -35,6 +35,8 @@ UnbufferedSerial serial(PA_11, PA_12, 115200);
 UnbufferedSerial usb_serial(USBTX, USBRX, 115200);
 DigitalOut led(LED_RED);
 
+uint32_t sonar_delay_ms = 50;
+
 void process_message(const char *buf) {
 	led = !led;
 	uint16_t data = (((uint16_t)buf[1]) << 8) | ((uint16_t)buf[2]);
@@ -112,6 +114,12 @@ void process_message(const char *buf) {
 			gun_sig = 1;
 		}
 		break;
+
+	case 't': // set sonar delay
+		if (data > 0) {
+			sonar_delay_ms = data;
+		}
+		break;
 	}
 }
 
@@ -152,6 +160,8 @@ void perform_detection(Sonar &sonar, char command) {
 	serial.write(buf, 6);
 }
 
+using duration_u32 = chrono::duration<uint32_t, milli>;
+
 int main() {
 	pwm_left = 0.0;
 	pwm_right = 0.0;
@@ -172,11 +182,11 @@ int main() {
 	printf("hello, world\n");
 
 	while (true) {
-		ThisThread::sleep_for(100ms);
+		ThisThread::sleep_for(duration_u32(sonar_delay_ms));
 		perform_detection(sonar_front, 'f');
-		ThisThread::sleep_for(100ms);
+		ThisThread::sleep_for(duration_u32(sonar_delay_ms));
 		perform_detection(sonar_left, 'l');
-		ThisThread::sleep_for(100ms);
+		ThisThread::sleep_for(duration_u32(sonar_delay_ms));
 		perform_detection(sonar_right, 'r');
 	}
 }
