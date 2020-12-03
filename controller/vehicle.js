@@ -9,6 +9,12 @@ const recv_sensor_mapping = {
     b: "back"
 }
 
+const sonar_masks = {
+    front: 0b001,
+    left: 0b010,
+    right: 0b100
+}
+
 class Vehicle extends EventEmitter {
     constructor() {
         super();
@@ -124,6 +130,18 @@ class Vehicle extends EventEmitter {
 
     async setSonarInterval(time_ms) {
         await this._sendCommand("t", time_ms);
+    }
+
+    async setEnabledSonar(sonars) {
+        let x = 0;
+        for (const sonar of sonars) {
+            const mask = sonar_masks[sonar];
+            if (typeof mask !== "number") {
+                throw new Error(`Illegal sonar name ${sonar}`);
+            }
+            x |= mask;
+        }
+        await this._sendCommand("T", x);
     }
 
     // ==== Helper functions ====

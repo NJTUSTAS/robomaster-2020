@@ -36,6 +36,12 @@ UnbufferedSerial usb_serial(USBTX, USBRX, 115200);
 DigitalOut led(LED_RED);
 
 uint32_t sonar_delay_ms = 50;
+const uint8_t SONAR_MASK_FRONT = 0b001;
+const uint8_t SONAR_MASK_LEFT = 0b010;
+const uint8_t SONAR_MASK_RIGHT = 0b100;
+const uint8_t SONAR_MASK_ALL =
+    SONAR_MASK_FRONT | SONAR_MASK_LEFT | SONAR_MASK_RIGHT;
+uint8_t enabled_sonars = SONAR_MASK_ALL;
 
 void process_message(const char *buf) {
 	led = !led;
@@ -120,6 +126,10 @@ void process_message(const char *buf) {
 			sonar_delay_ms = data;
 		}
 		break;
+
+	case 'T': // set enabled sonars
+		enabled_sonars = data & SONAR_MASK_ALL;
+		break;
 	}
 }
 
@@ -182,11 +192,17 @@ int main() {
 	printf("hello, world\n");
 
 	while (true) {
-		ThisThread::sleep_for(duration_u32(sonar_delay_ms));
-		perform_detection(sonar_front, 'f');
-		ThisThread::sleep_for(duration_u32(sonar_delay_ms));
-		perform_detection(sonar_left, 'l');
-		ThisThread::sleep_for(duration_u32(sonar_delay_ms));
-		perform_detection(sonar_right, 'r');
+		if ((enabled_sonars & SONAR_MASK_FRONT) == SONAR_MASK_FRONT) {
+			ThisThread::sleep_for(duration_u32(sonar_delay_ms));
+			perform_detection(sonar_front, 'f');
+		}
+		if ((enabled_sonars & SONAR_MASK_LEFT) == SONAR_MASK_LEFT) {
+			ThisThread::sleep_for(duration_u32(sonar_delay_ms));
+			perform_detection(sonar_left, 'l');
+		}
+		if ((enabled_sonars & SONAR_MASK_RIGHT) == SONAR_MASK_RIGHT) {
+			ThisThread::sleep_for(duration_u32(sonar_delay_ms));
+			perform_detection(sonar_right, 'r');
+		}
 	}
 }
