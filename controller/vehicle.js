@@ -132,6 +132,9 @@ class Vehicle extends EventEmitter {
         await this._sendCommand("t", time_ms);
     }
 
+    /**
+     * @param {("front"|"left"|"right")[]} sonars
+     */
     async setEnabledSonar(sonars) {
         let x = 0;
         for (const sonar of sonars) {
