@@ -65,7 +65,7 @@ class TagDetector extends EventEmitter {
         ]);
 
         byline(this.process.stdout).on("data", line => {
-            if (!this.this.initialized) {
+            if (!this.initialized) {
                 this.initialized = true;
                 this.emit("init");
             }
