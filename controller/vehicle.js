@@ -10,9 +10,10 @@ const recv_sensor_mapping = {
 }
 
 const sonar_masks = {
-    front: 0b001,
-    left: 0b010,
-    right: 0b100
+    front: 0b0001,
+    left: 0b0010,
+    right: 0b0100,
+    back: 0b1000
 }
 
 class Vehicle extends EventEmitter {
@@ -133,7 +134,7 @@ class Vehicle extends EventEmitter {
     }
 
     /**
-     * @param {("front"|"left"|"right")[]} sonars
+     * @param {("front"|"left"|"right"|"back")[]} sonars
      */
     async setEnabledSonar(sonars) {
         let x = 0;

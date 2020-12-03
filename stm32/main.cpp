@@ -15,6 +15,8 @@ const PinName PIN_SONAR_LEFT_TRIG = A2;
 const PinName PIN_SONAR_LEFT_ECHO = A3;
 const PinName PIN_SONAR_RIGHT_TRIG = /*A4*/ PC_2;
 const PinName PIN_SONAR_RIGHT_ECHO = /*A5*/ PC_3;
+const PinName PIN_SONAR_BACK_TRIG = PH_0;
+const PinName PIN_SONAR_BACK_ECHO = PH_1;
 const PinName PIN_GUN_SIG = PD_2;
 
 PwmOut pwm_left(PIN_PWM_LEFT);
@@ -30,17 +32,19 @@ DigitalOut gun_sig(PIN_GUN_SIG);
 Sonar sonar_front(PIN_SONAR_FRONT_TRIG, PIN_SONAR_FRONT_ECHO);
 Sonar sonar_left(PIN_SONAR_LEFT_TRIG, PIN_SONAR_LEFT_ECHO);
 Sonar sonar_right(PIN_SONAR_RIGHT_TRIG, PIN_SONAR_RIGHT_ECHO);
+Sonar sonar_back(PIN_SONAR_BACK_TRIG, PIN_SONAR_BACK_ECHO);
 
 UnbufferedSerial serial(PA_11, PA_12, 115200);
 UnbufferedSerial usb_serial(USBTX, USBRX, 115200);
 DigitalOut led(LED_RED);
 
 uint32_t sonar_delay_ms = 50;
-const uint8_t SONAR_MASK_FRONT = 0b001;
-const uint8_t SONAR_MASK_LEFT = 0b010;
-const uint8_t SONAR_MASK_RIGHT = 0b100;
+const uint8_t SONAR_MASK_FRONT = 0b0001;
+const uint8_t SONAR_MASK_LEFT = 0b0010;
+const uint8_t SONAR_MASK_RIGHT = 0b0100;
+const uint8_t SONAR_MASK_BACK = 0b1000;
 const uint8_t SONAR_MASK_ALL =
-    SONAR_MASK_FRONT | SONAR_MASK_LEFT | SONAR_MASK_RIGHT;
+    SONAR_MASK_FRONT | SONAR_MASK_LEFT | SONAR_MASK_RIGHT | SONAR_MASK_BACK;
 uint8_t enabled_sonars = SONAR_MASK_ALL;
 
 void process_message(const char *buf) {
@@ -203,6 +207,10 @@ int main() {
 		if ((enabled_sonars & SONAR_MASK_RIGHT) == SONAR_MASK_RIGHT) {
 			ThisThread::sleep_for(duration_u32(sonar_delay_ms));
 			perform_detection(sonar_right, 'r');
+		}
+		if ((enabled_sonars & SONAR_MASK_BACK) == SONAR_MASK_BACK) {
+			ThisThread::sleep_for(duration_u32(sonar_delay_ms));
+			perform_detection(sonar_back, 'b');
 		}
 	}
 }
