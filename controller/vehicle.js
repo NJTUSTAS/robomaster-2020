@@ -123,7 +123,7 @@ class Vehicle extends EventEmitter {
     }
 
     async setSonarInterval(time_ms) {
-        await this._sendCommand("t", value);
+        await this._sendCommand("t", time_ms);
     }
 
     // ==== Helper functions ====
