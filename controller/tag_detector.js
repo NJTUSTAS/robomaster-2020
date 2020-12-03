@@ -55,6 +55,7 @@ function parseOutputLine(line) {
 class TagDetector extends EventEmitter {
     constructor(executable = "./tag_detector") {
         super();
+        this.initialized = false;
 
         this.process = spawn(executable, [
             "--camera-width", "1024",
@@ -64,6 +65,10 @@ class TagDetector extends EventEmitter {
         ]);
 
         byline(this.process.stdout).on("data", line => {
+            if (!this.this.initialized) {
+                this.initialized = true;
+                this.emit("init");
+            }
             this.emit("frame", parseOutputLine(line.toString()));
         });
 
@@ -83,6 +88,14 @@ class TagDetector extends EventEmitter {
     }
     close() {
         this.process.kill("SIGINT");
+    }
+    async waitInitialized() {
+        if (this.initialized) {
+            return;
+        }
+        await new Promise(resolve => {
+            this.once("init", () => resolve());
+        });
     }
 }
 
