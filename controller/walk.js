@@ -422,7 +422,7 @@ async function scene2() {
         await sleep(1000);
     }); //纠正误差
     await do_then_stop(go_ahead, .3, async () => {
-        sleep(1500);
+        await sleep(1500);
     });
     await vehicle.setEnabledSonar(["right"]);
     await do_then_stop(go_crab, -.4, async () => {
@@ -451,7 +451,7 @@ async function scene2() {
     });
 
     //向右横走
-    await do_then_stop(go_crab, -.3, async () => {
+    await do_then_stop(go_crab, -.35, async () => {
         await sleep(1000);
     })
     outer: for (; ;) {
