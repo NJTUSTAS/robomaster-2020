@@ -11,26 +11,26 @@ const vehicle = new Vehicle();
 const motor = new Motor();
 const tag_detector = new TagDetector("../tag_detector");
 
-const fix_factor=1;
+const fix_factor = 1;
 
 async function go_ahead(speed) {
     motor.setSpeed("left_front", speed);
     motor.setSpeed("left_back", speed);
-    motor.setSpeed("right_front", speed*fix_factor);
-    motor.setSpeed("right_back", speed*fix_factor);
+    motor.setSpeed("right_front", speed * fix_factor);
+    motor.setSpeed("right_back", speed * fix_factor);
 }
 
 /**
  * @param {number} speed positive for left, negative for right
  */
 async function go_crab(speed) {
-    motor.setSpeed("right_front", speed*fix_factor);
+    motor.setSpeed("right_front", speed * fix_factor);
     motor.setSpeed("left_back", speed);
     motor.setSpeed("left_front", -speed);
-    motor.setSpeed("right_back", -speed*fix_factor);
+    motor.setSpeed("right_back", -speed * fix_factor);
 }
 
-async function do_then_stop(controlFn, speed, blocker){
+async function do_then_stop(controlFn, speed, blocker) {
     await controlFn(speed);
     await blocker();
     await controlFn(-speed);
@@ -205,7 +205,7 @@ class WalkStraight {
     }
 }
 
-async function scene1(){
+async function scene1() {
     await motor.begin();
     await vehicle.setSonarInterval(50);
     await tag_detector.waitInitialized();
@@ -381,7 +381,7 @@ async function scene1(){
     await go_ahead(0);
 }
 
-async function scene2(){
+async function scene2() {
     await motor.begin();
     await vehicle.setSonarInterval(50);
     await tag_detector.waitInitialized();
@@ -390,55 +390,55 @@ async function scene2(){
     //向右横向
     await vehicle.setEnabledSonar(["front"]);
 
-    await do_then_stop(go_crab,-.4,async()=>{
+    await do_then_stop(go_crab, -.4, async () => {
         await wait_until(distance_greater_than("front"));
         await sleep(150);
     });
 
     //直走
-    await do_then_stop(go_ahead,0.4,async()=>{
-        await wait_until(distance_less_than("front",200));
+    await do_then_stop(go_ahead, 0.4, async () => {
+        await wait_until(distance_less_than("front", 200));
         await sleep(150);
     });
 
     //前撞墙
     await go_ahead(.3);
     await sleep(1000);
-    await do_then_stop(go_ahead,-.3,async()=>{
+    await do_then_stop(go_ahead, -.3, async () => {
         await sleep(500);
     });
 
     //左撞墙
     await go_crab(.4);
     await sleep(1500);
-    await do_then_stop(go_crab,-.4,async()=>{
+    await do_then_stop(go_crab, -.4, async () => {
         await sleep(500);
     });
 
     //向右横走
     await vehicle.setEnabledSonar(["back"]);
-    await do_then_stop(go_crab,-.4,async()=>{
-        await wait_until(distance_less_than("back",200));
-        await sleep(700);
+    await do_then_stop(go_crab, -.4, async () => {
+        await wait_until(distance_less_than("back", 200));
+        await sleep(1000);
     });
-    await do_then_stop(go_ahead,.3,async()=>{
-        sleep(1000);
+    await do_then_stop(go_ahead, .3, async () => {
+        sleep(1500);
     });
     await vehicle.setEnabledSonar(["right"]);
-    await do_then_stop(go_crab,-.4,async()=>{
-        await wait_until(distance_less_than("right",200));
+    await do_then_stop(go_crab, -.4, async () => {
+        await wait_until(distance_less_than("right", 200));
         await sleep(100);
     });
 
     // 撞墙
     await go_crab(-.2);
     await sleep(1000);
-    await do_then_stop(go_crab,.2,async()=>{
+    await do_then_stop(go_crab, .2, async () => {
         await sleep(500);
     });
 
     // 向后直走
-    await do_then_stop(go_ahead,-.3,async()=>{
+    await do_then_stop(go_ahead, -.3, async () => {
         await wait_until(distance_greater_than("right"));
         await sleep(120);
     });
@@ -446,13 +446,13 @@ async function scene2(){
     //撞墙
     await go_ahead(-.2);
     await sleep(1500);
-    await do_then_stop(go_ahead,.2,async()=>{
+    await do_then_stop(go_ahead, .2, async () => {
         await sleep(500);
     });
 
     //向右横走
-    await do_then_stop(go_crab,-.3,async()=>{
-        await sleep(800);
+    await do_then_stop(go_crab, -.3, async () => {
+        await sleep(1000);
     })
     outer: for (; ;) {
         for (let i = 0; i < 2; i++) {
@@ -461,7 +461,7 @@ async function scene2(){
                 break outer;
             }
         }
-        await do_then_stop(go_ahead,-.1,async()=>{
+        await do_then_stop(go_ahead, -.1, async () => {
             await sleep(300);
         })
     }
