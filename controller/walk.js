@@ -419,10 +419,10 @@ async function scene2(){
     await vehicle.setEnabledSonar(["back"]);
     await do_then_stop(go_crab,-.4,async()=>{
         await wait_until(distance_less_than("back",200));
-        await sleep(1000);
+        await sleep(700);
     });
     await do_then_stop(go_ahead,.3,async()=>{
-        sleep(400);
+        sleep(1000);
     });
     await vehicle.setEnabledSonar(["right"]);
     await do_then_stop(go_crab,-.4,async()=>{
