@@ -145,7 +145,7 @@ class WalkStraight {
         sensor_data_em.addListener("update", this.listener);
     }
     async onUpdate(d) {
-        if (d.sonar[this.sonar1] < 0 || d.sonar[this.sonar1] < 0) {
+        if (d.sonar[this.sonar1] < 0 || d.sonar[this.sonar2] < 0) {
             await this.controlFn(0);
             return;
         }
@@ -416,7 +416,7 @@ async function scene2(){
 
     //向右横走
     await go_crab(-.4);
-    await vehicle.setEnabledSonar("back");
+    await vehicle.setEnabledSonar(["back"]);
     await wait_until(distance_less_than("back",200));
     await sleep(100);
     await go_ahead(.3);
@@ -425,7 +425,7 @@ async function scene2(){
     await sleep(50);
     await go_ahead(0);
     await go_crab(-.4);
-    await vehicle.setEnabledSonar("right");
+    await vehicle.setEnabledSonar(["right"]);
     await wait_until(distance_less_than("right",200));
     await go_ahead(0);
 
