@@ -381,18 +381,18 @@ async function scene2(){
 
     //向右横向
     await vehicle.setEnabledSonar(["front"]);
-    await go_crab(-.3);
+    await go_crab(-.4);
     await wait_until(distance_greater_than("front"));
     await sleep(150);
-    await go_crab(.3);
+    await go_crab(.4);
     await sleep(50);
     await go_ahead(0);
 
     //直走
-    await go_ahead(.3);
+    await go_ahead(.4);
     await wait_until(distance_less_than("front",200));
     await sleep(150);
-    await go_ahead(-.3);
+    await go_ahead(-.4);
     await sleep(50);
     await go_ahead(0);
 
@@ -415,12 +415,17 @@ async function scene2(){
     await go_crab(0);
 
     //向右横走
-    await go_crab(-.3);
+    await go_crab(-.4);
+    await vehicle.setEnabledSonar("back");
     await wait_until(distance_less_than("back",200));
     await sleep(100);
     await go_ahead(.3);
-    await sleep(300);
-    await go_crab(-.3);
+    await sleep(400);
+    await go_ahead(-.3);
+    await sleep(50);
+    await go_ahead(0);
+    await go_crab(-.4);
+    await vehicle.setEnabledSonar("right");
     await wait_until(distance_less_than("right",200));
     await go_ahead(0);
 
