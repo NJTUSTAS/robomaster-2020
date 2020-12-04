@@ -30,6 +30,14 @@ async function go_crab(speed) {
     motor.setSpeed("right_back", -speed*fix_factor);
 }
 
+async function do_then_stop(controlFn, speed, blocker){
+    await controlFn(speed);
+    await blocker();
+    await controlFn(-speed);
+    await sleep(50);
+    await controlFn(0);
+}
+
 /**
  * @param {number} speed positive for left, negative for right
  */
@@ -381,84 +389,71 @@ async function scene2(){
 
     //向右横向
     await vehicle.setEnabledSonar(["front"]);
-    await go_crab(-.4);
-    await wait_until(distance_greater_than("front"));
-    await sleep(150);
-    await go_crab(.4);
-    await sleep(50);
-    await go_ahead(0);
+
+    await do_then_stop(go_crab,-.4,async()=>{
+        await wait_until(distance_greater_than("front"));
+        await sleep(150);
+    });
 
     //直走
-    await go_ahead(.4);
-    await wait_until(distance_less_than("front",200));
-    await sleep(150);
-    await go_ahead(-.4);
-    await sleep(50);
-    await go_ahead(0);
+    await do_then_stop(go_ahead,0.4,async()=>{
+        await wait_until(distance_less_than("front",200));
+        await sleep(150);
+    });
 
     //前撞墙
     await go_ahead(.3);
     await sleep(1000);
-    await go_ahead(-.3);
-    await sleep(500);
-    await go_ahead(.3);
-    await sleep(50);
-    await go_ahead(0);
+    await do_then_stop(go_ahead,-.3,async()=>{
+        await sleep(500);
+    });
 
     //左撞墙
-    await go_crab(.3);
-    await sleep(1000);
-    await go_crab(-.3);
-    await sleep(500);
-    await go_crab(.3);
-    await sleep(50);
-    await go_crab(0);
+    await go_crab(.4);
+    await sleep(1500);
+    await do_then_stop(go_crab,-.4,async()=>{
+        await sleep(500);
+    });
 
     //向右横走
-    await go_crab(-.4);
     await vehicle.setEnabledSonar(["back"]);
-    await wait_until(distance_less_than("back",200));
-    await sleep(100);
-    await go_ahead(.3);
-    await sleep(400);
-    await go_ahead(-.3);
-    await sleep(50);
-    await go_ahead(0);
-    await go_crab(-.4);
+    await do_then_stop(go_crab,-.4,async()=>{
+        await wait_until(distance_less_than("back",200));
+        await sleep(1000);
+    });
+    await do_then_stop(go_ahead,.3,async()=>{
+        sleep(400);
+    });
     await vehicle.setEnabledSonar(["right"]);
-    await wait_until(distance_less_than("right",200));
-    await go_ahead(0);
+    await do_then_stop(go_crab,-.4,async()=>{
+        await wait_until(distance_less_than("right",200));
+        await sleep(100);
+    });
 
     // 撞墙
     await go_crab(-.2);
     await sleep(1000);
-    await go_crab(.2);
-    await sleep(500);
-    await go_crab(-.2);
-    await sleep(50);
-    await go_ahead(0);
+    await do_then_stop(go_crab,.2,async()=>{
+        await sleep(500);
+    });
 
     // 向后直走
-    await go_ahead(-.3);
-    await wait_until(distance_greater_than("right"));
-    await sleep(120);
-    await go_ahead(-.3);
-    await sleep(50);
-    await go_ahead(0);
+    await do_then_stop(go_ahead,-.3,async()=>{
+        await wait_until(distance_greater_than("right"));
+        await sleep(120);
+    });
 
     //撞墙
     await go_ahead(-.2);
-    await sleep(1000);
-    await go_ahead(.2);
-    await sleep(500);
-    await go_ahead(-.2);
-    await sleep(50);
-    await go_ahead(0);
+    await sleep(1500);
+    await do_then_stop(go_ahead,.2,async()=>{
+        await sleep(500);
+    });
 
     //向右横走
-    await go_crab(-.1);
-    await sleep(1000);
-    await go_ahead(0);
+    await do_then_stop(go_crab,-.3,async()=>{
+        await sleep(800);
+    })
     outer: for (; ;) {
         for (let i = 0; i < 2; i++) {
             const tags = detect_result_to_tag_array(await wait_event(tag_detector, "frame"));
@@ -466,11 +461,9 @@ async function scene2(){
                 break outer;
             }
         }
-        await go_crab(-.1);
-        await sleep(300);
-        await go_crab(.1);
-        await sleep(50);
-        await go_ahead(0);
+        await do_then_stop(go_ahead,-.1,async()=>{
+            await sleep(300);
+        })
     }
     await ShotTargetAction.doAction(tag_detector, motor, vehicle, [9, 1, 8]);
     await go_ahead(0);
