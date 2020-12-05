@@ -12,6 +12,7 @@ const motor = new Motor();
 const tag_detector = new TagDetector("../tag_detector");
 
 const fix_factor = 1;
+const targetsA = [1,2,3];
 
 async function go_ahead(speed) {
     motor.setSpeed("left_front", speed);
@@ -128,6 +129,15 @@ function clamp(num, a, b) {
         b = t;
     }
     return num <= a ? a : num >= b ? b : num;
+}
+
+function containsAll(a,b){
+    for(const e of b){
+        if(!a.includes(e)){
+            return false;
+        }
+    }
+    return true;
 }
 
 class WalkStraight {
@@ -466,7 +476,7 @@ async function scene2() {
     outer: for (; ;) {
         for (let i = 0; i < 2; i++) {
             const tags = detect_result_to_tag_array(await wait_event(tag_detector, "frame"));
-            if (tags.includes(1) && tags.includes(8) && tags.includes(9)) {
+            if (containsAll(tags,targetsA)) {
                 break outer;
             }
         }
@@ -474,7 +484,7 @@ async function scene2() {
             await sleep(50);
         })
     }
-    await ShotTargetAction.doAction(tag_detector, motor, vehicle, [9, 1, 8]);
+    await ShotTargetAction.doAction(tag_detector, motor, vehicle, targetsA);
     await go_ahead(0);
 }
 
