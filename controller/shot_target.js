@@ -12,6 +12,7 @@ const skip_duration = 3000;
 const retry_duration = 2000;
 const stable_duration = 500;
 const shot_detect_delay = 1000;
+const max_shot_count = 10;
 
 function find_center(tag_id, detect_result) {
     for (const det of detect_result.detections) {
@@ -147,6 +148,7 @@ class ShotTargetAction {
         let last_shot_time;
         let last_seen_time;
         let stable_since;
+        let shot_count;
         const next_tag = () => {
             shot_progress++;
             if (shot_progress >= targets.length) {
@@ -157,6 +159,7 @@ class ShotTargetAction {
             last_shot_time = null;
             last_seen_time = null;
             stable_since = null;
+            shot_count = 0;
             console.log(`Next target: #${targets[shot_progress]}`);
         }
 
@@ -201,8 +204,14 @@ class ShotTargetAction {
 
             if (stable && tag_found && (last_shot_time === null || now > last_shot_time + retry_duration) && now > stable_since + stable_duration) {
                 console.log(`Shot #${follower.tag}`);
+                shot_count++;
                 vehicle.shot();
                 last_shot_time = now;
+
+                if (shot_count >= max_shot_count) {
+                    console.log('Give up current target');
+                    next_tag();
+                }
             } else if (!tag_found && last_shot_time !== null && now > last_shot_time + shot_detect_delay) {
                 console.log(`#${follower.tag} is shot!`);
                 next_tag();
