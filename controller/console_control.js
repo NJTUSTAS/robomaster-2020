@@ -6,33 +6,44 @@ W       前进
 A       左移
 S       后退
 D       右移
-Z       左转
-X       右转
-J       射击J
-K       射击K
-L       射击L
-Q       设置射击序列
-R       直接射击
+Q       左转
+E       右转
+J       射击A
+K       射击B
+L       射击C
+Tab     设置射击序列
+Z       直接射击
 */
 
 const c_pitch_initial = 4100;
 const c_go_ahead_speed = .5;
 const c_go_crab_speed = .5;
-const c_rotate_speed = .5;
+const c_rotate_speed = .3;
+const target_groups = {
+    a: [1, 2, 3],
+    b: [4, 5, 6],
+    c: [7, 8, 9]
+};
 
 const { EventEmitter } = require("events");
 const readline = require("readline");
 const Vehicle = require("./vehicle");
 const Motor = require("./motor");
 const TagDetector = require("./tag_detector");
+const sleep = require("await-sleep");
+const ShotTargetAction = require("./shot_target");
 
 // 初始化控制台
 readline.emitKeypressEvents(process.stdin);
 process.stdin.setRawMode(true);
 const keyEventEmitter = new EventEmitter();
-process.stdin.on("keypress", (_, key) => {
+process.stdin.on("keypress", async (_, key) => {
     if (key.ctrl && key.name === "c") {
-        process.exit();
+        try {
+            await stop();
+        } finally {
+            process.exit();
+        }
     }
     keyEventEmitter.emit("key", key);
 });
@@ -104,20 +115,58 @@ async function stop() {
     console.log("Stop");
 }
 
+async function brake(last_action) {
+    switch (last_action) {
+        case null:
+            await stop();
+            return;
+        case "w":
+            await go_ahead(-c_go_ahead_speed);
+            break;
+        case "s":
+            await go_ahead(c_go_ahead_speed);
+            break;
+        case "a":
+            await go_crab(-c_go_crab_speed);
+            break;
+        case "d":
+            await go_crab(c_go_crab_speed);
+            break;
+        case "z":
+            await rotate(-c_rotate_speed);
+            break;
+        case "x":
+            await rotate(c_rotate_speed);
+            break;
+    }
+    await sleep(50);
+    await stop();
+}
+
+/**
+ * @param {"a"|"b"|"c"} group
+ */
+async function do_shot(group) {
+    (async () => {
+        await ShotTargetAction.doAction(tag_detector, motor, vehicle, target_groups[group]);
+        console.log("OK!");
+    })();
+}
+
 (async () => {
     let current_action = null;
     for (; ;) {
         const key = await read_key();
         switch (key.name) {
             case 'space':
+                await brake(current_action);
                 current_action = null;
-                await stop();
                 break;
 
             case "w":
                 if (current_action === "w") {
+                    await brake(current_action);
                     current_action = null;
-                    await stop();
                 } else {
                     current_action = "w";
                     await go_ahead(c_go_ahead_speed);
@@ -125,8 +174,8 @@ async function stop() {
                 break;
             case "a":
                 if (current_action === "a") {
+                    await brake(current_action);
                     current_action = null;
-                    await stop();
                 } else {
                     current_action = "a";
                     await go_crab(c_go_crab_speed);
@@ -135,8 +184,8 @@ async function stop() {
 
             case "s":
                 if (current_action === "s") {
+                    await brake(current_action);
                     current_action = null;
-                    await stop();
                 } else {
                     current_action = "s";
                     await go_ahead(-c_go_ahead_speed);
@@ -145,44 +194,77 @@ async function stop() {
 
             case "d":
                 if (current_action === "d") {
+                    await brake(current_action);
                     current_action = null;
-                    await stop();
                 } else {
                     current_action = "d";
                     await go_crab(-c_go_crab_speed);
                 }
                 break;
-            case "z":
+            case "q":
                 if (current_action === "z") {
+                    await brake(current_action);
                     current_action = null;
-                    await stop();
                 } else {
                     current_action = "z";
                     await rotate(c_rotate_speed);
                 }
                 break;
 
-            case "x":
+            case "e":
                 if (current_action === "x") {
+                    await brake(current_action);
                     current_action = null;
-                    await stop();
                 } else {
                     current_action = "x";
                     await rotate(-c_rotate_speed);
                 }
                 break;
 
-            case 'r':
+            case 'z':
                 await vehicle.shot();
                 break;
 
-            // case 'q':
-            //     process.stdout.write("Choose target (A, B or C): ");
-            //     let _k = await read_key();
-            //     if([])
-            //     break;
+            case 'tab':
+                process.stdout.write("Choose target group (A, B or C): ");
+                let _k = await read_key();
+                if (!["a", "b", "c"].includes(_k.name)) {
+                    console.log("Illegal target group");
+                    break;
+                }
+                const targetGroup = _k.name;
+                console.log(targetGroup);
+                process.stdout.write("Targets:");
+                const targets = [];
+                for (let i = 0; i < 3; i++) {
+                    _k = await read_key();
+                    if (!["1", "2", "3"].includes(_k.name)) {
+                        console.log("Illegal target");
+                        break;
+                    }
+                    const target = parseInt(_k.name);
+                    process.stdout.write(` ${target}`);
+                    targets.push(target);
+                }
+                target_groups[targetGroup] = targets;
+                console.log();
+                console.log(`${target_groups} targets: ${JSON.stringify(target_groups[targetGroup])}`);
+                break;
+
+            case "j":
+                await do_shot("a");
+                break;
+
+            case "k":
+                await do_shot("b");
+                break;
+
+            case "l":
+                await do_shot("c");
+                break;
+
             default:
-                console.log(`Unrecognized key: ${key}`);
+                console.log(`Unrecognized key: ${JSON.stringify(key)}`);
                 break;
         }
     }
