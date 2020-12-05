@@ -12,7 +12,9 @@ J       射击A
 K       射击B
 L       射击C
 Tab     设置射击序列
-Z       直接射击
+Return  直接射击
+Up      抬枪
+Down    压枪
 */
 
 const c_pitch_initial = 4100;
@@ -68,11 +70,6 @@ const tag_detector = new TagDetector("../tag_detector");
 (async () => {
     await tag_detector.waitInitialized();
     console.log("Tag detector initialized.");
-})();
-
-(async () => {
-    await vehicle.setPitch(c_pitch_initial);
-    console.log(`Set pitch to ${c_pitch_initial}.`);
 })();
 
 async function go_ahead(speed) {
@@ -153,119 +150,151 @@ async function do_shot(group) {
     })();
 }
 
+function clamp(num, a, b) {
+    if (a > b) {
+        const t = a;
+        a = b;
+        b = t;
+    }
+    return num <= a ? a : num >= b ? b : num;
+}
+
+let pitch = c_pitch_initial;
+
+async function offsetPitch(delta) {
+    pitch += delta;
+    pitch = clamp(pitch, 3200, 6300);
+    await vehicle.setPitch(pitch);
+    console.log(`Set pitch to ${pitch}`);
+}
+
 (async () => {
+    offsetPitch(0);
     let current_action = null;
     for (; ;) {
-        const key = await read_key();
-        switch (key.name) {
-            case 'space':
-                await brake(current_action);
-                current_action = null;
-                break;
-
-            case "w":
-                if (current_action === "w") {
+        try {
+            const key = await read_key();
+            switch (key.name) {
+                case 'space':
                     await brake(current_action);
                     current_action = null;
-                } else {
-                    current_action = "w";
-                    await go_ahead(c_go_ahead_speed);
-                }
-                break;
-            case "a":
-                if (current_action === "a") {
-                    await brake(current_action);
-                    current_action = null;
-                } else {
-                    current_action = "a";
-                    await go_crab(c_go_crab_speed);
-                }
-                break;
-
-            case "s":
-                if (current_action === "s") {
-                    await brake(current_action);
-                    current_action = null;
-                } else {
-                    current_action = "s";
-                    await go_ahead(-c_go_ahead_speed);
-                }
-                break;
-
-            case "d":
-                if (current_action === "d") {
-                    await brake(current_action);
-                    current_action = null;
-                } else {
-                    current_action = "d";
-                    await go_crab(-c_go_crab_speed);
-                }
-                break;
-            case "q":
-                if (current_action === "z") {
-                    await brake(current_action);
-                    current_action = null;
-                } else {
-                    current_action = "z";
-                    await rotate(c_rotate_speed);
-                }
-                break;
-
-            case "e":
-                if (current_action === "x") {
-                    await brake(current_action);
-                    current_action = null;
-                } else {
-                    current_action = "x";
-                    await rotate(-c_rotate_speed);
-                }
-                break;
-
-            case 'z':
-                await vehicle.shot();
-                break;
-
-            case 'tab':
-                process.stdout.write("Choose target group (A, B or C): ");
-                let _k = await read_key();
-                if (!["a", "b", "c"].includes(_k.name)) {
-                    console.log("Illegal target group");
                     break;
-                }
-                const targetGroup = _k.name;
-                console.log(targetGroup);
-                process.stdout.write("Targets:");
-                const targets = [];
-                for (let i = 0; i < 3; i++) {
-                    _k = await read_key();
-                    if (!["1", "2", "3"].includes(_k.name)) {
-                        console.log("Illegal target");
+
+                case "w":
+                    if (current_action === "w") {
+                        await brake(current_action);
+                        current_action = null;
+                    } else {
+                        current_action = "w";
+                        await go_ahead(c_go_ahead_speed);
+                    }
+                    break;
+                case "a":
+                    if (current_action === "a") {
+                        await brake(current_action);
+                        current_action = null;
+                    } else {
+                        current_action = "a";
+                        await go_crab(c_go_crab_speed);
+                    }
+                    break;
+
+                case "s":
+                    if (current_action === "s") {
+                        await brake(current_action);
+                        current_action = null;
+                    } else {
+                        current_action = "s";
+                        await go_ahead(-c_go_ahead_speed);
+                    }
+                    break;
+
+                case "d":
+                    if (current_action === "d") {
+                        await brake(current_action);
+                        current_action = null;
+                    } else {
+                        current_action = "d";
+                        await go_crab(-c_go_crab_speed);
+                    }
+                    break;
+                case "q":
+                    if (current_action === "z") {
+                        await brake(current_action);
+                        current_action = null;
+                    } else {
+                        current_action = "z";
+                        await rotate(c_rotate_speed);
+                    }
+                    break;
+
+                case "e":
+                    if (current_action === "x") {
+                        await brake(current_action);
+                        current_action = null;
+                    } else {
+                        current_action = "x";
+                        await rotate(-c_rotate_speed);
+                    }
+                    break;
+
+                case 'return':
+                    await vehicle.shot();
+                    break;
+
+                case 'tab':
+                    process.stdout.write("Choose target group (A, B or C): ");
+                    let _k = await read_key();
+                    if (!["a", "b", "c"].includes(_k.name)) {
+                        console.log("Illegal target group");
                         break;
                     }
-                    const target = parseInt(_k.name);
-                    process.stdout.write(` ${target}`);
-                    targets.push(target);
-                }
-                target_groups[targetGroup] = targets;
-                console.log();
-                console.log(`${target_groups} targets: ${JSON.stringify(target_groups[targetGroup])}`);
-                break;
+                    const targetGroup = _k.name;
+                    console.log(targetGroup);
+                    process.stdout.write("Targets:");
+                    const targets = [];
+                    for (let i = 0; i < 3; i++) {
+                        _k = await read_key();
+                        if (!["1", "2", "3", "4", "5", "6", "7", "8", "9"].includes(_k.name)) {
+                            console.log("Illegal target");
+                            break;
+                        }
+                        const target = parseInt(_k.name);
+                        process.stdout.write(` ${target}`);
+                        targets.push(target);
+                    }
+                    target_groups[targetGroup] = targets;
+                    console.log();
+                    console.log(`${targetGroup} targets: ${JSON.stringify(target_groups[targetGroup])}`);
+                    break;
 
-            case "j":
-                await do_shot("a");
-                break;
+                case "j":
+                    await do_shot("a");
+                    break;
 
-            case "k":
-                await do_shot("b");
-                break;
+                case "k":
+                    await do_shot("b");
+                    break;
 
-            case "l":
-                await do_shot("c");
-                break;
+                case "l":
+                    await do_shot("c");
+                    break;
 
-            default:
-                console.log(`Unrecognized key: ${JSON.stringify(key)}`);
-                break;
+                case "up":
+                    await offsetPitch(100);
+                    break;
+
+                case "down":
+                    await offsetPitch(-100);
+                    break;
+
+                default:
+                    console.log(`Unrecognized key: ${JSON.stringify(key)}`);
+                    break;
+            }
+        } catch (e) {
+            console.log("Communication error!");
+            console.log(e);
         }
     }
 })();
