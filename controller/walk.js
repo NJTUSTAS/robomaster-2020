@@ -390,69 +390,78 @@ async function scene2() {
     //向右横向
     await vehicle.setEnabledSonar(["front"]);
 
-    await do_then_stop(go_crab, -.4, async () => {
+    await do_then_stop(go_crab, -.5, async () => {
         await wait_until(distance_greater_than("front"));
         await sleep(150);
     });
 
     //直走
-    await do_then_stop(go_ahead, 0.4, async () => {
+    await do_then_stop(go_ahead, 0.5, async () => {
         await wait_until(distance_less_than("front", 200));
         await sleep(150);
     });
 
+    /*
     //前撞墙
     await go_ahead(.3);
     await sleep(1000);
     await do_then_stop(go_ahead, -.3, async () => {
         await sleep(500);
     });
+    */
 
     //左撞墙
-    await go_crab(.4);
+    await go_crab(.3);
     await sleep(1500);
-    await do_then_stop(go_crab, -.4, async () => {
+    await do_then_stop(go_crab, -.3, async () => {
         await sleep(500);
     });
 
     //向右横走
     await vehicle.setEnabledSonar(["back"]);
-    await do_then_stop(go_crab, -.4, async () => {
-        await wait_until(distance_less_than("back", 200));
-        await sleep(1000);
+    await do_then_stop(go_crab, -.5, async () => {
+        await wait_until(distance_less_than("back"));
+        await sleep(150);
     });
-    await do_then_stop(go_ahead, .3, async () => {
-        sleep(1500);
+
+    // 后撞墙
+    await go_ahead(-.3);
+    await sleep(1500);
+    await do_then_stop(go_ahead, .5, async () => {
+        await sleep(500);
     });
+
+    // 向右横走
     await vehicle.setEnabledSonar(["right"]);
-    await do_then_stop(go_crab, -.4, async () => {
+    await do_then_stop(go_crab, -.5, async () => {
         await wait_until(distance_less_than("right", 200));
         await sleep(100);
     });
 
     // 撞墙
-    await go_crab(-.2);
+    await go_crab(-.3);
     await sleep(1000);
-    await do_then_stop(go_crab, .2, async () => {
+    await do_then_stop(go_crab, .3, async () => {
         await sleep(500);
     });
 
     // 向后直走
-    await do_then_stop(go_ahead, -.3, async () => {
-        await wait_until(distance_greater_than("right"));
-        await sleep(120);
+    await vehicle.setEnabledSonar(["back"]);
+    await do_then_stop(go_ahead, -.5, async () => {
+        await wait_until(distance_less_than("back", 200));
+        await sleep(100);
     });
 
     //撞墙
-    await go_ahead(-.2);
+    await go_ahead(-.3);
     await sleep(1500);
-    await do_then_stop(go_ahead, .2, async () => {
+    await do_then_stop(go_ahead, .3, async () => {
         await sleep(500);
     });
 
     //向右横走
-    await do_then_stop(go_crab, -.3, async () => {
-        await sleep(1000);
+    await do_then_stop(go_crab, -.5, async () => {
+        await sleep(500);
     })
     outer: for (; ;) {
         for (let i = 0; i < 2; i++) {
@@ -461,8 +470,8 @@ async function scene2() {
                 break outer;
             }
         }
-        await do_then_stop(go_ahead, -.1, async () => {
-            await sleep(300);
+        await do_then_stop(go_crab, -.3, async () => {
+            await sleep(50);
         })
     }
     await ShotTargetAction.doAction(tag_detector, motor, vehicle, [9, 1, 8]);

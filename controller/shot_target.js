@@ -25,7 +25,7 @@ function find_center(tag_id, detect_result) {
 function calc_err(tag_center) {
     return [
         tag_center[0] / 960 - .5,
-        tag_center[1] / 720 - .7
+        tag_center[1] / 720 - .65
     ];
 }
 
@@ -60,9 +60,9 @@ class TagFollower {
         this.kp_v = 1.5;
         this.ki_v = 0;
         this.kd_v = 0.2;
-        this.kp_h = 1;
+        this.kp_h = .8;
         this.ki_h = 0;
-        this.kd_h = 0.02;
+        this.kd_h = 0.08;
         this.err_sum = [0, 0];
         this.last_center = null;
         this.last_time = null;
@@ -138,7 +138,7 @@ class ShotTargetAction {
             await motor.setSpeed("left_back", -speed);
             await motor.setSpeed("right_front", speed);
             await motor.setSpeed("right_back", speed);
-        }, 50);
+        }, 40);
 
         let pitch = pitch_initial;
 
