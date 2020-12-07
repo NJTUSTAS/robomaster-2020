@@ -140,94 +140,11 @@ function containsAll(a,b){
     return true;
 }
 
-class WalkStraight {
-    /**
-     * @param {control:number)=>any} controlFn
-     * @param {"front"|"left"|"right"|"back"} sonar1
-     * @param {"front"|"left"|"right"|"back"} sonar2
-     */
-    constructor(controlFn, sonar1, sonar2) {
-        this.controlFn = controlFn;
-        this.sonar1 = sonar1;
-        this.sonar2 = sonar2;
-        this.kp = 0.0005;
-        this.ki = 0;
-        this.kd = 1;
-        this.last_err = null;
-        this.last_time = null;
-        this.integral_err = 0;
-    }
-    async start() {
-        await this.controlFn(0);
-        this.listener = d => this.onUpdate(d);
-        sensor_data_em.addListener("update", this.listener);
-    }
-    async onUpdate(d) {
-        if (d.sonar[this.sonar1] < 0 || d.sonar[this.sonar2] < 0) {
-            await this.controlFn(0);
-            return;
-        }
-
-        const now = Date.now();
-        const dt = this.last_time === null ? 0 : now - this.last_time;
-        const current_err = d.sonar[this.sonar1] - d.sonar[this.sonar2];
-
-        let control_p = current_err * this.kp;
-        let control_i = this.integral_err * this.ki;
-        control_i = clamp(control_i, -control_p * .3, control_p * .3);
-        let control_d = dt === 0 ? 0 : (current_err - this.last_time) / dt;
-        control_d = clamp(control_d, -control_p * .3, control_p * .3);
-        let control = control_p + control_i + control_d;
-        control = clamp(control, control_p * .1, control_p * 2);
-        control = clamp(control, -.5, .5)
-
-        this.last_time = now;
-        this.last_err = current_err;
-        this.integral_err += current_err * dt;
-
-        console.log(`control is ${control}`);
-        await this.controlFn(control);
-    }
-    stop() {
-        sensor_data_em.removeListener("update", this.listener);
-    }
-    static async doAction(blocker, controlFn, sonar1, sonar2) {
-        const action = new WalkStraight(controlFn, sonar1, sonar2);
-        await action.start();
-        await blocker();
-        action.stop();
-    }
-    static async goAhead(speed, blocker) {
-        await WalkStraight.doAction(blocker, control => {
-            motor.setSpeed("left_front", speed * (1 - control));
-            motor.setSpeed("left_back", speed * (1 - control));
-            motor.setSpeed("right_front", speed * (1 + control));
-            motor.setSpeed("right_back", speed * (1 + control));
-        }, "left", "right");
-    }
-    static async goCrab(speed, blocker) {
-        await WalkStraight.doAction(blocker, control => {
-            motor.setSpeed("right_front", speed * (1 + control));
-            motor.setSpeed("left_back", speed * (1 - control));
-            motor.setSpeed("left_front", -speed * (1 - control));
-            motor.setSpeed("right_back", -speed * (1 + control));
-        }, "front", "back");
-    }
-}
-
 async function scene1() {
     await motor.begin();
     await vehicle.setSonarInterval(50);
     await tag_detector.waitInitialized();
     await vehicle.setPitch(4100);
-
-    /*
-    await vehicle.setEnabledSonar(["front", "left", "right"]);
-    await WalkStraight.goAhead(.2, async () => {
-        await wait_until(distance_less_than("front"));
-    });
-    await go_ahead(0);
-*/
 
     // 直走
     await vehicle.setEnabledSonar(["left"]);
@@ -241,11 +158,6 @@ async function scene1() {
     // 向左横走
     await go_crab(.5);
     await wait_until(distance_less_than("left", 150));
-    //await WalkStraight.goCrab(.5, async () => {
-    //    await wait_until(distance_less_than("left", 150));
-    //});
-
-    //return;
 
     // 撞墙
     await go_crab(.3);
